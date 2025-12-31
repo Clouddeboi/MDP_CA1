@@ -44,7 +44,8 @@ void World::Update(sf::Time dt)
 
 	m_scenegraph.RemoveWrecks();
 
-	SpawnEnemies();
+	//Removing Enemies from scene (not needed for the game)
+	//SpawnEnemies();
 
 	m_scenegraph.Update(dt, m_command_queue);
 	AdaptPlayerPosition();
@@ -150,7 +151,8 @@ void World::BuildScene()
 	std::unique_ptr<SoundNode> soundNode(new SoundNode(m_sounds));
 	m_scenegraph.AttachChild(std::move(soundNode));
 
-	AddEnemies();
+	//Removing Enemies from scene (not needed for the game)
+	//AddEnemies();
 
 	/*std::unique_ptr<Aircraft> left_escort(new Aircraft(AircraftType::kRaptor, m_textures, m_fonts));
 	left_escort->setPosition(-80.f, 50.f);
