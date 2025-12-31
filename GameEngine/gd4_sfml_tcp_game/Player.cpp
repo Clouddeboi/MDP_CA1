@@ -19,10 +19,17 @@ Player::Player(): m_current_mission_status(MissionStatus::kMissionRunning)
     //Set initial key bindings
     m_key_binding[sf::Keyboard::Key::A] = Action::kMoveLeft;
     m_key_binding[sf::Keyboard::Key::D] = Action::kMoveRight;
-    m_key_binding[sf::Keyboard::Key::W] = Action::kMoveUp;
-    m_key_binding[sf::Keyboard::Key::S] = Action::kMoveDown;
-    m_key_binding[sf::Keyboard::Key::M] = Action::kMissileFire;
+
+    //Instead of moving up or down, the players will be able to jump to move up and physics will drag them down
+    m_key_binding[sf::Keyboard::Key::Space] = Action::kJump;
+    //m_key_binding[sf::Keyboard::Key::W] = Action::kMoveUp;
+    //m_key_binding[sf::Keyboard::Key::S] = Action::kMoveDown;
+    
+    //Don't need a missle fire
+    //m_key_binding[sf::Keyboard::Key::M] = Action::kMissileFire;
+
     m_key_binding[sf::Keyboard::Key::Space] = Action::kBulletFire;
+
 
     //Set initial action bindings
     InitialiseActions();
@@ -102,19 +109,19 @@ void Player::InitialiseActions()
     const float kPlayerSpeed = 200.f;
     m_action_binding[Action::kMoveLeft].action = DerivedAction<Aircraft>(AircraftMover(-kPlayerSpeed, 0.f));
     m_action_binding[Action::kMoveRight].action = DerivedAction<Aircraft>(AircraftMover(kPlayerSpeed, 0.f));
-    m_action_binding[Action::kMoveUp].action = DerivedAction<Aircraft>(AircraftMover(0.f, -kPlayerSpeed));
-    m_action_binding[Action::kMoveDown].action = DerivedAction<Aircraft>(AircraftMover(0.f, kPlayerSpeed));
+    //m_action_binding[Action::kMoveUp].action = DerivedAction<Aircraft>(AircraftMover(0.f, -kPlayerSpeed));
+    //m_action_binding[Action::kMoveDown].action = DerivedAction<Aircraft>(AircraftMover(0.f, kPlayerSpeed));
     m_action_binding[Action::kBulletFire].action = DerivedAction<Aircraft>([](Aircraft& a, sf::Time dt)
         {
             a.Fire();
         }
     );
 
-    m_action_binding[Action::kMissileFire].action = DerivedAction<Aircraft>([](Aircraft& a, sf::Time dt)
-        {
-            a.LaunchMissile();
-        }
-    );
+    //m_action_binding[Action::kMissileFire].action = DerivedAction<Aircraft>([](Aircraft& a, sf::Time dt)
+    //    {
+    //        a.LaunchMissile();
+    //    }
+    //);
 
 }
 
@@ -124,8 +131,8 @@ bool Player::IsRealTimeAction(Action action)
     {
     case Action::kMoveLeft:
     case Action::kMoveRight:
-    case Action::kMoveDown:
-    case Action::kMoveUp:
+    //case Action::kMoveDown:
+    //case Action::kMoveUp:
     case Action::kBulletFire:
         return true;
     default:
