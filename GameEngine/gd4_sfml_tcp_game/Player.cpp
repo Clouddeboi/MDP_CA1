@@ -22,14 +22,9 @@ Player::Player(): m_current_mission_status(MissionStatus::kMissionRunning)
 
     //Instead of moving up or down, the players will be able to jump to move up and physics will drag them down
     m_key_binding[sf::Keyboard::Key::Space] = Action::kJump;
-    //m_key_binding[sf::Keyboard::Key::W] = Action::kMoveUp;
-    //m_key_binding[sf::Keyboard::Key::S] = Action::kMoveDown;
-    
-    //Don't need a missle fire
-    //m_key_binding[sf::Keyboard::Key::M] = Action::kMissileFire;
 
-    m_key_binding[sf::Keyboard::Key::Space] = Action::kBulletFire;
-
+    //Using mouse inputs for firing bullets instead
+    m_mouse_binding[sf::Mouse::Button::Left] = Action::kBulletFire;
 
     //Set initial action bindings
     InitialiseActions();
@@ -51,6 +46,15 @@ void Player::HandleEvent(const sf::Event& event, CommandQueue& command_queue)
             command_queue.Push(m_action_binding[found->second]);
         }
     }
+
+    if (const auto* mousePressed = event.getIf<sf::Event::MouseButtonPressed>())
+    {
+        auto found = m_mouse_binding.find(static_cast<sf::Mouse::Button>(mousePressed->button));
+        if (found != m_mouse_binding.end() && !IsRealTimeAction(found->second))
+        {
+            command_queue.Push(m_action_binding[found->second]);
+        }
+    }
 }
 
 void Player::HandleRealTimeInput(CommandQueue& command_queue)
@@ -59,6 +63,14 @@ void Player::HandleRealTimeInput(CommandQueue& command_queue)
     for (auto pair : m_key_binding)
     {
         if (sf::Keyboard::isKeyPressed(pair.first) && IsRealTimeAction(pair.second))
+        {
+            command_queue.Push(m_action_binding[pair.second]);
+        }
+    }
+
+    for (auto pair : m_mouse_binding)
+    {
+        if (sf::Mouse::isButtonPressed(pair.first) && IsRealTimeAction(pair.second))
         {
             command_queue.Push(m_action_binding[pair.second]);
         }
@@ -94,6 +106,29 @@ sf::Keyboard::Key Player::GetAssignedKey(Action action) const
     return sf::Keyboard::Key::Unknown;
 }
 
+void Player::AssignMouseButton(Action action, sf::Mouse::Button button)
+{
+    //Remove any existing mouse to action bindings
+    for (auto itr = m_mouse_binding.begin(); itr != m_mouse_binding.end();)
+    {
+        if (itr->second == action)
+            m_mouse_binding.erase(itr++);
+        else
+            ++itr;
+    }
+    m_mouse_binding[button] = action;
+}
+
+std::optional<sf::Mouse::Button> Player::GetAssignedMouseButton(Action action) const
+{
+    for (auto const& pair : m_mouse_binding)
+    {
+        if (pair.second == action)
+            return pair.first;
+    }
+    return std::nullopt;
+}
+
 void Player::SetMissionStatus(MissionStatus status)
 {
     m_current_mission_status = status;
@@ -117,12 +152,6 @@ void Player::InitialiseActions()
         }
     );
 
-    //m_action_binding[Action::kMissileFire].action = DerivedAction<Aircraft>([](Aircraft& a, sf::Time dt)
-    //    {
-    //        a.LaunchMissile();
-    //    }
-    //);
-
 }
 
 bool Player::IsRealTimeAction(Action action)
@@ -131,8 +160,6 @@ bool Player::IsRealTimeAction(Action action)
     {
     case Action::kMoveLeft:
     case Action::kMoveRight:
-    //case Action::kMoveDown:
-    //case Action::kMoveUp:
     case Action::kBulletFire:
         return true;
     default:
