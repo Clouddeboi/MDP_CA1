@@ -14,7 +14,7 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	,m_scene_layers()
 	,m_world_bounds({ 0.f,0.f }, { m_camera.getSize().x, 3000.f })
 	,m_spawn_position(m_camera.getSize().x/2.f, m_world_bounds.size.y - m_camera.getSize().y/2.f)
-	,m_scrollspeed(-50.f)
+	,m_scrollspeed(0.f)//Setting it to 0 since we don't want our players to move up automatically
 	,m_player_aircraft(nullptr)
 	,m_scene_texture({ m_target.getSize().x, m_target.getSize().y })
 {
@@ -26,7 +26,7 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 void World::Update(sf::Time dt)
 {
 	//Scroll the world
-	m_camera.move({ 0, m_scrollspeed * dt.asSeconds() });
+	//m_camera.move({ 0, m_scrollspeed * dt.asSeconds() });
 	
 	m_player_aircraft->SetVelocity(0.f, 0.f);
 
