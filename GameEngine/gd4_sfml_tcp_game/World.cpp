@@ -14,7 +14,7 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	,m_sounds(sounds)
 	,m_scenegraph(ReceiverCategories::kNone)
 	,m_scene_layers()
-	,m_world_bounds({ 0.f,0.f }, { m_camera.getSize().x, 3000.f })
+	,m_world_bounds({ 0.f,0.f }, { m_camera.getSize().x, 720.f })
 	,m_spawn_position(m_camera.getSize().x/2.f, m_world_bounds.size.y - m_camera.getSize().y/2.f)
 	,m_scrollspeed(0.f)//Setting it to 0 since we don't want our players to move up automatically
 	,m_player_aircraft(nullptr)
@@ -59,14 +59,14 @@ void World::Update(sf::Time dt)
 	}
 	AdaptPlayerVelocity();
 
-	HandleCollisions();
-
 	m_scenegraph.RemoveWrecks();
 
 	//Removing Enemies from scene (not needed for the game)
 	//SpawnEnemies();
 
 	m_scenegraph.Update(dt, m_command_queue);
+
+	HandleCollisions();
 	AdaptPlayerPosition();
 }
 
@@ -146,10 +146,10 @@ void World::BuildScene()
 	m_scene_layers[static_cast<int>(SceneLayers::kBackground)]->AttachChild(std::move(background_sprite));
 
 	//Add the finish line
-	sf::Texture& finish_texture = m_textures.Get(TextureID::kFinishLine);
-	std::unique_ptr<SpriteNode> finish_sprite(new SpriteNode(finish_texture));
-	finish_sprite->setPosition({ 0.f, -76.f });
-	m_scene_layers[static_cast<int>(SceneLayers::kBackground)]->AttachChild(std::move(finish_sprite));
+	//sf::Texture& finish_texture = m_textures.Get(TextureID::kFinishLine);
+	//std::unique_ptr<SpriteNode> finish_sprite(new SpriteNode(finish_texture));
+	//finish_sprite->setPosition({ 0.f, -76.f });
+	//m_scene_layers[static_cast<int>(SceneLayers::kBackground)]->AttachChild(std::move(finish_sprite));
 
 	//Add the player's aircraft
 	std::unique_ptr<Aircraft> leader(new Aircraft(AircraftType::kEagle, m_textures, m_fonts));
@@ -166,11 +166,11 @@ void World::BuildScene()
 	m_player_aircraft->SetVelocity(0.f, 0.f);
 
 	//Platforms
-	sf::Vector2f platformSize(350.f, 100.f);
+	sf::Vector2f platformSize(720.f, 100.f);
 	std::unique_ptr<Platform> platform(new Platform(platformSize, sf::Color(120, 80, 40)));
 	//Position the platform relative to camera center
 	sf::Vector2f center = m_camera.getCenter();
-	platform->setPosition(sf::Vector2f{ m_spawn_position });
+	platform->setPosition(sf::Vector2f{ 720.f, 720.f });
 	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(platform));
 	
 	//Add the particle nodes to the scene
@@ -389,6 +389,82 @@ void World::HandleCollisions()
 			//Collision response
 			aircraft.Damage(projectile.GetDamage());
 			projectile.Destroy();
+		}
+		else if (MatchesCategories(pair, ReceiverCategories::kAircraft, ReceiverCategories::kPlatform))
+		{
+			auto& player = static_cast<Aircraft&>(*pair.first);
+			auto& platform = static_cast<Platform&>(*pair.second);
+
+			sf::FloatRect playerRect = player.GetBoundingRect();
+			sf::FloatRect platformRect = platform.GetBoundingRect();
+
+			//Centers
+			const sf::Vector2f playerCenter{
+				playerRect.position.x + playerRect.size.x * 0.5f,
+				playerRect.position.y + playerRect.size.y * 0.5f
+			};
+			const sf::Vector2f platformCenter{
+				platformRect.position.x + platformRect.size.x * 0.5f,
+				platformRect.position.y + platformRect.size.y * 0.5f
+			};
+
+			//Half extents
+			const sf::Vector2f playerHalf{ playerRect.size.x * 0.5f, playerRect.size.y * 0.5f };
+			const sf::Vector2f platformHalf{ platformRect.size.x * 0.5f, platformRect.size.y * 0.5f };
+
+			//Delta between centers
+			const float deltaX = playerCenter.x - platformCenter.x;
+			const float deltaY = playerCenter.y - platformCenter.y;
+
+			const float overlapX = (playerHalf.x + platformHalf.x) - std::abs(deltaX);
+			const float overlapY = (playerHalf.y + platformHalf.y) - std::abs(deltaY);
+
+			if (overlapX <= 0.f || overlapY <= 0.f)
+				continue;
+
+			if (overlapX < overlapY)
+			{
+				//Side collision: push horizontally away from platform center
+				const float push = (deltaX > 0.f) ? overlapX : -overlapX;
+				player.move({ push, 0.f });
+
+				//Stop horizontal movement so player does not keep penetrating
+				sf::Vector2f vel = player.GetVelocity();
+				vel.x = 0.f;
+				player.SetVelocity(vel);
+			}
+			else
+			{
+				//Vertical collision
+				//If player coming from above and moving downward
+				const sf::Vector2f vel = player.GetVelocity();
+				if (deltaY < 0.f && vel.y > 0.f)
+				{
+					//land on top of platform: position player's bottom at platform top
+					const float platformTop = platformRect.position.y;
+					const float newPlayerCenterY = platformTop - playerHalf.y;
+					const float worldDeltaY = newPlayerCenterY - player.GetWorldPosition().y;
+					player.move({ 0.f, worldDeltaY });
+
+					//Stop downward motion and clear forces
+					sf::Vector2f v = player.GetVelocity();
+					if (v.y > 0.f) v.y = 0.f;
+					player.SetVelocity(v);
+					player.ClearForces();
+
+				}
+				else
+				{
+					//Hit from below: push player downward
+					const float push = (deltaY > 0.f) ? overlapY : -overlapY;
+					player.move({ 0.f, push });
+
+					//If pushed up/down, stop vertical velocity
+					sf::Vector2f v = player.GetVelocity();
+					v.y = 0.f;
+					player.SetVelocity(v);
+				}
+			}
 		}
 	}
 }
