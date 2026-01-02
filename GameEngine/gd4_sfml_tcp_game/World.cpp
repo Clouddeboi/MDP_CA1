@@ -4,6 +4,7 @@
 #include "ParticleNode.hpp"
 #include "SoundNode.hpp"
 #include "Command.hpp"
+#include "Platform.hpp"
 
 World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sounds)
 	:m_target(output_target)
@@ -164,6 +165,14 @@ void World::BuildScene()
 	//Initial vertical velocity zero
 	m_player_aircraft->SetVelocity(0.f, 0.f);
 
+	//Platforms
+	sf::Vector2f platformSize(350.f, 100.f);
+	std::unique_ptr<Platform> platform(new Platform(platformSize, sf::Color(120, 80, 40)));
+	//Position the platform relative to camera center
+	sf::Vector2f center = m_camera.getCenter();
+	platform->setPosition(sf::Vector2f{ m_spawn_position });
+	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(platform));
+	
 	//Add the particle nodes to the scene
 	std::unique_ptr<ParticleNode> smokeNode(new ParticleNode(ParticleType::kSmoke, m_textures));
 	m_scene_layers[static_cast<int>(SceneLayers::kLowerAir)]->AttachChild(std::move(smokeNode));

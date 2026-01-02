@@ -149,6 +149,18 @@ void Player::InitialiseActions()
             a.Fire();
         }
     );
+    //m_action_binding[Action::kJump].action = DerivedAction<Aircraft>([](Aircraft& a, sf::Time)
+    //    {
+    //        const float verticalVel = a.GetVelocity().y;
+    //        const float groundedEpsilon = 1.f;
+    //        if (std::abs(verticalVel) <= groundedEpsilon)
+    //        {
+    //            // impulse such that v += impulse / mass
+    //            const float jumpImpulse = -6050.f;//negative y = up
+    //            a.AddImpulse({ 0.f, jumpImpulse });
+    //        }
+    //    }
+    //);
 
 }
 
