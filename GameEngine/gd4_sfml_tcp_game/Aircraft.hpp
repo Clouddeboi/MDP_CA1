@@ -31,6 +31,10 @@ public:
 	bool IsMarkedForRemoval() const override;
 	void PlayLocalSound(CommandQueue& commands, SoundEffect effect);
 
+	void Jump();
+	void SetOnGround(bool grounded);
+	bool IsOnGround() const;
+
 private:
 	virtual void DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const;
 	virtual void UpdateCurrent(sf::Time dt, CommandQueue& commands) override;
@@ -66,6 +70,9 @@ private:
 	bool m_show_explosion;
 	bool m_spawned_pickup;
 	bool m_played_explosion_sound;
+
+	bool m_is_on_ground;
+	float m_jump_speed;
 
 };
 

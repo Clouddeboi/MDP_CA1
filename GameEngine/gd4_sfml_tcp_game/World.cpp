@@ -47,7 +47,7 @@ void World::Update(sf::Time dt)
 		m_scenegraph.OnCommand(gravity, dt);
 	}
 	sf::Vector2f playerVel = m_player_aircraft->GetVelocity();
-	m_player_aircraft->SetVelocity(0.f, 0.f);
+	m_player_aircraft->SetVelocity(0.f, playerVel.y);
 
 	DestroyEntitiesOutsideView();
 	GuideMissiles();
@@ -215,7 +215,7 @@ void World::AdaptPlayerVelocity()
 	sf::Vector2f velocity = m_player_aircraft->GetVelocity();
 
 	//If they are moving diagonally divide by sqrt 2
-	if (velocity.x != 0.f && velocity.y != 0.f)
+	if (m_player_aircraft->IsOnGround() && velocity.x != 0.f && velocity.y != 0.f)
 	{
 		m_player_aircraft->SetVelocity(velocity / std::sqrt(2.f));
 	}
@@ -362,6 +362,9 @@ void World::HandleCollisions()
 {
 	std::set<SceneNode::Pair> collision_pairs;
 	m_scenegraph.CheckSceneCollision(m_scenegraph, collision_pairs);
+
+	bool playerGroundedThisFrame = false;
+
 	for (SceneNode::Pair pair : collision_pairs)
 	{
 		if (MatchesCategories(pair, ReceiverCategories::kPlayerAircraft, ReceiverCategories::kEnemyAircraft))
@@ -452,6 +455,7 @@ void World::HandleCollisions()
 					player.SetVelocity(v);
 					player.ClearForces();
 
+					playerGroundedThisFrame = true;
 				}
 				else
 				{
@@ -466,6 +470,10 @@ void World::HandleCollisions()
 				}
 			}
 		}
+	}
+	if (m_player_aircraft)
+	{
+		m_player_aircraft->SetOnGround(playerGroundedThisFrame);
 	}
 }
 

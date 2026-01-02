@@ -49,6 +49,8 @@ Aircraft::Aircraft(AircraftType type, const TextureHolder& textures, const FontH
 	, m_show_explosion(true)
 	, m_spawned_pickup(false)
 	, m_played_explosion_sound(false)
+	, m_is_on_ground(true)
+	, m_jump_speed(2500.f)
 
 {
 	m_explosion.SetFrameSize(sf::Vector2i(256, 256));
@@ -359,4 +361,35 @@ void Aircraft::PlayLocalSound(CommandQueue& commands, SoundEffect effect)
 		});
 
 	commands.Push(command);
+}
+
+void Aircraft::Jump()
+{
+	if (m_is_on_ground)
+	{
+		sf::Vector2f vel = GetVelocity();
+		vel.y = -m_jump_speed;
+		SetVelocity(vel);
+		m_is_on_ground = false;
+		move({ 0.f, -2.f });
+	}
+}
+
+void Aircraft::SetOnGround(bool grounded)
+{
+	m_is_on_ground = grounded;
+	if (m_is_on_ground)
+	{
+		sf::Vector2f vel = GetVelocity();
+		if (vel.y > 0.f)
+		{
+			vel.y = 0.f;
+			SetVelocity(vel);
+		}
+	}
+}
+
+bool Aircraft::IsOnGround() const
+{
+	return m_is_on_ground;
 }
