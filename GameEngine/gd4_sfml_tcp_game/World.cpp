@@ -3,6 +3,7 @@
 #include "Projectile.hpp"
 #include "ParticleNode.hpp"
 #include "SoundNode.hpp"
+#include "Command.hpp"
 
 World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sounds)
 	:m_target(output_target)
@@ -27,7 +28,24 @@ void World::Update(sf::Time dt)
 {
 	//Scroll the world
 	//m_camera.move({ 0, m_scrollspeed * dt.asSeconds() });
-	
+	{
+		Command gravity;
+		//Target only specific entity categories
+		gravity.category = static_cast<int>(ReceiverCategories::kAircraft);
+
+		const float gravityAcceleration = 1800.f * 9.81f;
+		gravity.action = DerivedAction<Entity>([gravityAcceleration](Entity& e, sf::Time)
+			{
+				if (e.IsUsingPhysics())
+				{
+					//F = m * g (downwards)
+					e.AddForce({ 0.f, gravityAcceleration * e.GetMass() });
+				}
+			});
+
+		m_scenegraph.OnCommand(gravity, dt);
+	}
+	sf::Vector2f playerVel = m_player_aircraft->GetVelocity();
 	m_player_aircraft->SetVelocity(0.f, 0.f);
 
 	DestroyEntitiesOutsideView();
@@ -103,7 +121,6 @@ void World::LoadTextures()
 	m_textures.Load(TextureID::kExplosion, "Media/Textures/Explosion.png");
 	m_textures.Load(TextureID::kParticle, "Media/Textures/Particle.png");
 
-
 }
 
 void World::BuildScene()
@@ -137,8 +154,15 @@ void World::BuildScene()
 	std::unique_ptr<Aircraft> leader(new Aircraft(AircraftType::kEagle, m_textures, m_fonts));
 	m_player_aircraft = leader.get();
 	m_player_aircraft->setPosition(m_spawn_position);
-	m_player_aircraft->SetVelocity(40.f, m_scrollspeed);
+	//m_player_aircraft->SetVelocity(40.f, m_scrollspeed);
 	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(leader));
+
+	//Enable physics on the player so gravity, impulses, drag affect it
+	m_player_aircraft->SetUsePhysics(true);
+	m_player_aircraft->SetMass(1.0f);
+	m_player_aircraft->SetLinearDrag(1.5f);
+	//Initial vertical velocity zero
+	m_player_aircraft->SetVelocity(0.f, 0.f);
 
 	//Add the particle nodes to the scene
 	std::unique_ptr<ParticleNode> smokeNode(new ParticleNode(ParticleType::kSmoke, m_textures));
@@ -187,7 +211,7 @@ void World::AdaptPlayerVelocity()
 		m_player_aircraft->SetVelocity(velocity / std::sqrt(2.f));
 	}
 	//Add scrolling velocity
-	m_player_aircraft->Accelerate(0.f, m_scrollspeed);
+	//m_player_aircraft->Accelerate(0.f, m_scrollspeed);
 }
 
 void World::SpawnEnemies()
