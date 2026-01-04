@@ -34,7 +34,7 @@ void World::Update(sf::Time dt)
 		//Target only specific entity categories
 		gravity.category = static_cast<int>(ReceiverCategories::kAircraft);
 
-		const float gravityAcceleration = 1800.f * 9.81f;
+		const float gravityAcceleration = 500.f * 9.81f;
 		gravity.action = DerivedAction<Entity>([gravityAcceleration](Entity& e, sf::Time)
 			{
 				if (e.IsUsingPhysics())
@@ -46,8 +46,13 @@ void World::Update(sf::Time dt)
 
 		m_scenegraph.OnCommand(gravity, dt);
 	}
-	sf::Vector2f playerVel = m_player_aircraft->GetVelocity();
-	m_player_aircraft->SetVelocity(0.f, playerVel.y);
+
+	if (m_player_aircraft)
+	{
+		sf::Vector2f playerVel = m_player_aircraft->GetVelocity();
+		if (!m_player_aircraft->IsKnockbackActive())
+			m_player_aircraft->SetVelocity(0.f, playerVel.y);
+	}
 
 	DestroyEntitiesOutsideView();
 	GuideMissiles();
@@ -60,10 +65,6 @@ void World::Update(sf::Time dt)
 	AdaptPlayerVelocity();
 
 	m_scenegraph.RemoveWrecks();
-
-	//Removing Enemies from scene (not needed for the game)
-	//SpawnEnemies();
-
 	m_scenegraph.Update(dt, m_command_queue);
 
 	AdaptPlayerPosition();
@@ -205,14 +206,51 @@ void World::AdaptPlayerPosition()
 {
 	//keep the player on the screen
 	sf::FloatRect view_bounds(m_camera.getCenter() - m_camera.getSize() / 2.f, m_camera.getSize());
-	const float border_distance = 40.f;
+	const float border_distance = 20.f;
 
-	sf::Vector2f position = m_player_aircraft->getPosition();
-	position.x = std::max(position.x, view_bounds.position.x + border_distance);
-	position.x = std::min(position.x, view_bounds.position.x + view_bounds.size.x - border_distance);
-	position.y = std::max(position.y, view_bounds.position.y + border_distance);
-	position.y = std::min(position.y, view_bounds.position.y + view_bounds.size.y -border_distance);
+	if (!m_player_aircraft)
+		return;
+
+	sf::Vector2f oldPos = m_player_aircraft->getPosition();
+	sf::Vector2f position = oldPos;
+
+	const float leftBound = view_bounds.position.x + border_distance;
+	const float rightBound = view_bounds.position.x + view_bounds.size.x - border_distance;
+	const float topBound = view_bounds.position.y + border_distance;
+	const float bottomBound = view_bounds.position.y + view_bounds.size.y - border_distance;
+
+	position.x = std::max(position.x, leftBound);
+	position.x = std::min(position.x, rightBound);
+	position.y = std::max(position.y, topBound);
+	position.y = std::min(position.y, bottomBound);
 	m_player_aircraft->setPosition(position);
+
+	if (!m_player_aircraft->IsKnockbackActive())
+	{
+		//Edge Detection
+		bool hitLeft = (position.x == leftBound) && (oldPos.x < position.x);
+		bool hitRight = (position.x == rightBound) && (oldPos.x > position.x);
+		bool hitTop = (position.y == topBound) && (oldPos.y < position.y);
+		bool hitBottom = (position.y == bottomBound) && (oldPos.y > position.y);
+
+		if (hitLeft || hitRight || hitTop || hitBottom)
+		{
+			const float kKnockbackSpeedX = 2500.f;
+			const float kKnockbackSpeedY = 2000.f;
+			const sf::Time kKnockbackDuration = sf::seconds(0.2f);
+
+			float vx = 0.f;
+			float vy = 0.f;
+			
+			//Push in opposite direction to the edge hit
+			if (hitLeft)  vx = +kKnockbackSpeedX;
+			if (hitRight) vx = -kKnockbackSpeedX;
+			if (hitTop)   vy = +kKnockbackSpeedY;
+			if (hitBottom)vy = -kKnockbackSpeedY;
+
+			m_player_aircraft->ApplyKnockback({ vx, vy }, kKnockbackDuration);
+		}
+	}
 }
 
 void World::AdaptPlayerVelocity()

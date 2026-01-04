@@ -131,8 +131,54 @@ void Entity::ApplyPhysics(sf::Time dt)
     m_accumulated_forces = { 0.f, 0.f };
 }
 
+void Entity::ApplyKnockback(sf::Vector2f velocity, sf::Time duration)
+{
+    m_knockback_velocity = velocity;
+    m_knockback_duration = duration;
+
+    m_velocity += m_knockback_velocity;
+}
+
+bool Entity::IsKnockbackActive() const
+{
+    return m_knockback_duration > sf::Time::Zero;
+}
+
+sf::Vector2f Entity::GetKnockbackVelocity() const
+{
+    return m_knockback_velocity;
+}
+
+sf::Time Entity::GetRemainingKnockbackDuration() const
+{
+    return m_knockback_duration;
+}
+
+void Entity::ClearKnockback()
+{
+    m_knockback_velocity = { 0.f, 0.f };
+    m_knockback_duration = sf::Time::Zero;
+}
+
 void Entity::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 {
 	ApplyPhysics(dt);
+
+    //If knockback active, tick timer and override horizontal velocity
+    if (m_knockback_duration > sf::Time::Zero)
+    {
+        if (dt >= m_knockback_duration)
+        {
+            m_knockback_duration = sf::Time::Zero;
+            m_knockback_velocity = { 0.f, 0.f };
+        }
+        else
+        {
+            m_knockback_duration -= dt;
+        }
+
+        m_velocity = m_knockback_velocity;
+    }
+
     move(m_velocity * dt.asSeconds());
 }

@@ -26,6 +26,13 @@ public:
 	void SetLinearDrag(float drag);
 	float GetLinearDrag() const;
 
+	//Knockback
+	void ApplyKnockback(sf::Vector2f velocity, sf::Time duration);
+	bool IsKnockbackActive() const;
+	sf::Vector2f GetKnockbackVelocity() const;
+	sf::Time GetRemainingKnockbackDuration() const;
+	void ClearKnockback();
+
 	int GetHitPoints() const;
 	void Repair(int points);
 	void Damage(int points);
@@ -46,5 +53,8 @@ private:
 	float m_mass = 1.f;
 	sf::Vector2f m_accumulated_forces{0.f, 0.f};
 	float m_linear_drag{ 0.0f };
+
+	sf::Vector2f m_knockback_velocity{ 0.f, 0.f };
+	sf::Time m_knockback_duration{ sf::Time::Zero };
 };
 
