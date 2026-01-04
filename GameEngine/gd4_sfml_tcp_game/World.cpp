@@ -66,8 +66,8 @@ void World::Update(sf::Time dt)
 
 	m_scenegraph.Update(dt, m_command_queue);
 
-	HandleCollisions();
 	AdaptPlayerPosition();
+	HandleCollisions();	
 }
 
 void World::Draw()
@@ -172,6 +172,11 @@ void World::BuildScene()
 	sf::Vector2f center = m_camera.getCenter();
 	platform->setPosition(sf::Vector2f{ 720.f, 720.f });
 	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(platform));
+
+	//sf::Vector2f platformSize2(720.f, 100.f);
+	//std::unique_ptr<Platform> platform2(new Platform(platformSize2, sf::Color(120, 80, 40)));
+	//platform2->setPosition(sf::Vector2f{ 320.f, 620.f });
+	//m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(platform2));
 	
 	//Add the particle nodes to the scene
 	std::unique_ptr<ParticleNode> smokeNode(new ParticleNode(ParticleType::kSmoke, m_textures));
