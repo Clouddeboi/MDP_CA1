@@ -127,12 +127,12 @@ void Aircraft::CollectMissile(unsigned int count)
 void Aircraft::UpdateTexts()
 {
 	m_health_display->SetString(std::to_string(GetHitPoints()) + "HP");
-	m_health_display->setPosition({ 0.f, 50.f });
+	m_health_display->setPosition({ 0.f, -50.f });
 	m_health_display->setRotation(-getRotation());
 
 	if (m_missile_display)
 	{
-		m_missile_display->setPosition({ 0.f, 70.f });
+		m_missile_display->setPosition({ 0.f, -70.f });
 		if (m_missile_ammo == 0)
 		{
 			m_missile_display->SetString("");
