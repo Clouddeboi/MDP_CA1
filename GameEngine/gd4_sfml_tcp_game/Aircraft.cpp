@@ -332,19 +332,21 @@ void Aircraft::UpdateRollAnimation()
 {
 	if (Table[static_cast<int>(m_type)].m_has_roll_animation)
 	{
+		//Flip sprite based on velocity
+		const float vx = GetVelocity().x;
+		sf::Vector2f currentScale = m_sprite.getScale();
+
+		if (vx < 0.f && currentScale.x > 0.f)
+		{
+			m_sprite.setScale(sf::Vector2f(-currentScale.x, currentScale.y));
+		}
+		else if (vx > 0.f && currentScale.x < 0.f)
+		{
+			m_sprite.setScale(sf::Vector2f(-currentScale.x, currentScale.y));
+		}
+
 		sf::IntRect textureRect = Table[static_cast<int>(m_type)].m_texture_rect;
-
-		//Roll left: Texture rect is offset once
-		if (GetVelocity().x < 0.f)
-		{
-			textureRect.position.x += textureRect.size.x;
-		}
-		else if (GetVelocity().x > 0.f)
-		{
-			textureRect.position.x += 2 * textureRect.size.x;
-		}
 		m_sprite.setTextureRect(textureRect);
-
 	}
 }
 
