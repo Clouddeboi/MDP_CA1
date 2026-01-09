@@ -217,12 +217,17 @@ void Aircraft::CreateProjectile(SceneNode& node, ProjectileType type, float x_of
 {
 	std::unique_ptr<Projectile> projectile(new Projectile(type, textures));
 	sf::Vector2f offset(x_offset * m_sprite.getGlobalBounds().size.x, y_offset * m_sprite.getGlobalBounds().size.y);
-	sf::Vector2f velocity(0, projectile->GetMaxSpeed());
-
-	float sign = IsAllied() ? -1.f : 1.f;
-	projectile->setPosition(GetWorldPosition() + offset * sign);
-	projectile->SetVelocity(velocity* sign);
-	node.AttachChild(std::move(projectile));
+	
+	if (type == ProjectileType::kAlliedBullet)
+	{
+		const float facing = (m_sprite.getScale().x < 0.f) ? -1.f : 1.f;
+		sf::Vector2f velocity(projectile->GetMaxSpeed() * facing, 0.f);
+		
+		//Place projectile slightly in front of the player on the facing X axis
+		projectile->setPosition(GetWorldPosition() + sf::Vector2f(offset.x + 55.f * facing, offset.y + -50.f));
+		projectile->SetVelocity(velocity);
+	}
+		node.AttachChild(std::move(projectile));
 }
 
 sf::FloatRect Aircraft::GetBoundingRect() const
