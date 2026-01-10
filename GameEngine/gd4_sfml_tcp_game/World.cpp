@@ -52,6 +52,13 @@ void World::Update(sf::Time dt)
 		sf::Vector2f playerVel = m_player_aircraft->GetVelocity();
 		if (!m_player_aircraft->IsKnockbackActive())
 			m_player_aircraft->SetVelocity(0.f, playerVel.y);
+
+		if (auto* window = dynamic_cast<sf::RenderWindow*>(&m_target))
+		{
+			sf::Vector2i mousePixel = sf::Mouse::getPosition(*window);
+			sf::Vector2f mouseWorld = m_target.mapPixelToCoords(mousePixel, m_camera);
+			m_player_aircraft->AimGunAt(mouseWorld);
+		}
 	}
 
 	DestroyEntitiesOutsideView();
@@ -159,6 +166,8 @@ void World::BuildScene()
 	//m_player_aircraft->SetVelocity(40.f, m_scrollspeed);
 	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(leader));
 
+	m_player_aircraft->SetGunOffset({ 50.f, -10.f });
+
 	//Enable physics on the player so gravity, impulses, drag affect it
 	m_player_aircraft->SetUsePhysics(true);
 	m_player_aircraft->SetMass(1.0f);
@@ -189,17 +198,6 @@ void World::BuildScene()
 	// Add sound effect node
 	std::unique_ptr<SoundNode> soundNode(new SoundNode(m_sounds));
 	m_scenegraph.AttachChild(std::move(soundNode));
-
-	//Removing Enemies from scene (not needed for the game)
-	//AddEnemies();
-
-	/*std::unique_ptr<Aircraft> left_escort(new Aircraft(AircraftType::kRaptor, m_textures, m_fonts));
-	left_escort->setPosition(-80.f, 50.f);
-	m_player_aircraft->AttachChild(std::move(left_escort));
-
-	std::unique_ptr<Aircraft> right_escort(new Aircraft(AircraftType::kRaptor, m_textures, m_fonts));
-	right_escort->setPosition(80.f, 50.f);
-	m_player_aircraft->AttachChild(std::move(right_escort));*/
 }
 
 void World::AdaptPlayerPosition()

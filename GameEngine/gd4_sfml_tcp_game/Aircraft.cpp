@@ -11,6 +11,15 @@
 namespace
 {
 	const std::vector<AircraftData> Table = InitializeAircraftData();
+	float kRadToDeg = 180.f / 3.14159265358979323846f;
+
+	static sf::Vector2f RotateVectorDeg(const sf::Vector2f& v, float degrees)
+	{
+		const float rad = degrees * 3.14159265358979323846f / 180.f;
+		const float c = std::cos(rad);
+		const float s = std::sin(rad);
+		return { v.x * c - v.y * s, v.x * s + v.y * c };
+	}
 }
 
 TextureID ToTextureID(AircraftType type)
@@ -51,6 +60,9 @@ Aircraft::Aircraft(AircraftType type, const TextureHolder& textures, const FontH
 	, m_played_explosion_sound(false)
 	, m_is_on_ground(true)
 	, m_jump_speed(2500.f)
+	, m_gun_world_rotation(0.f)
+	, m_gun_current_world_rotation(0.f)
+	, m_gun_rotation_speed(720.f)
 
 {
 	m_explosion.SetFrameSize(sf::Vector2i(256, 256));
@@ -58,6 +70,20 @@ Aircraft::Aircraft(AircraftType type, const TextureHolder& textures, const FontH
 	m_explosion.SetDuration(sf::seconds(1));
 	Utility::CentreOrigin(m_sprite);
 	Utility::CentreOrigin(m_explosion);
+
+	if (Table[static_cast<int>(type)].m_has_gun)
+	{
+		const AircraftData& d = Table[static_cast<int>(type)];
+
+		m_gun_sprite = std::make_unique<sf::Sprite>(textures.Get(d.m_gun_texture), d.m_gun_texture_rect);
+		Utility::CentreOrigin(*m_gun_sprite);
+
+		m_gun_offset = d.m_gun_offset;
+		m_has_gun = true;
+
+		// Initialize smoothing state so there's no jump on first frame
+		m_gun_current_world_rotation = m_gun_world_rotation;
+	}
 
 	m_fire_command.category = static_cast<int>(ReceiverCategories::kScene);
 	m_fire_command.action = [this, &textures](SceneNode& node, sf::Time dt)
@@ -249,7 +275,60 @@ void Aircraft::DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) co
 	else
 	{
 		target.draw(m_sprite, states);
+
+		if (m_has_gun && m_gun_sprite)
+		{
+			//Orbit gun around the aircraft center using the smoothed world rotation.
+			const sf::Vector2f rotatedOffset = RotateVectorDeg(m_gun_offset, m_gun_current_world_rotation);
+			const sf::Vector2f worldPos = GetWorldPosition() + rotatedOffset;
+
+			m_gun_sprite->setPosition(worldPos);
+			m_gun_sprite->setRotation(sf::degrees(m_gun_current_world_rotation));
+
+			target.draw(*m_gun_sprite);
+		}
 	}
+}
+
+void Aircraft::AttachGun(const TextureHolder& textures, TextureID textureId, const sf::IntRect& textureRect, const sf::Vector2f& offset)
+{
+	m_gun_offset = offset;
+	m_has_gun = true;
+
+	m_gun_current_world_rotation = m_gun_world_rotation;
+}
+
+void Aircraft::AimGunAt(const sf::Vector2f& worldPosition)
+{
+	if (!m_has_gun || !m_gun_sprite)
+		return;
+
+	//Desired angle in world space
+	const sf::Vector2f myWorldPos = GetWorldPosition();
+	const float dx = worldPosition.x - myWorldPos.x;
+	const float dy = worldPosition.y - myWorldPos.y;
+	const float worldAngle = std::atan2(dy, dx) * kRadToDeg;
+
+	m_gun_world_rotation = worldAngle;
+}
+
+//Shortest signed angle difference in degrees in range [-180,180]
+static float ShortestAngleDiff(float fromDeg, float toDeg)
+{
+	float diff = std::fmod(toDeg - fromDeg, 360.f);
+	if (diff < -180.f) diff += 360.f;
+	if (diff > 180.f) diff -= 360.f;
+	return diff;
+}
+
+void Aircraft::SetGunOffset(const sf::Vector2f& offset)
+{
+	m_gun_offset = offset;
+}
+
+sf::Vector2f Aircraft::GetGunOffset() const
+{
+	return m_gun_offset;
 }
 
 void Aircraft::UpdateCurrent(sf::Time dt, CommandQueue& commands)
@@ -274,6 +353,21 @@ void Aircraft::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 	UpdateMovementPattern(dt);
 
 	UpdateRollAnimation();
+
+	if (m_has_gun && m_gun_sprite)
+	{
+		const float dtSec = dt.asSeconds();
+
+		float angleDiff = ShortestAngleDiff(m_gun_current_world_rotation, m_gun_world_rotation);
+		const float maxStep = m_gun_rotation_speed * dtSec;
+		if (std::abs(angleDiff) > maxStep)
+			angleDiff = std::copysign(maxStep, angleDiff);
+
+		m_gun_current_world_rotation += angleDiff;
+
+		sf::Vector2f currentScale = m_gun_sprite->getScale();
+		m_gun_sprite->setScale({ std::abs(currentScale.x), std::abs(currentScale.y) });
+	}
 
 	//Check if bullets or misiles are fired
 	CheckProjectileLaunch(dt, commands);

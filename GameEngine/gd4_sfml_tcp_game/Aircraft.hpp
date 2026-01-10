@@ -7,6 +7,7 @@
 #include "ProjectileType.hpp"
 #include <SFML/Graphics/Sprite.hpp>
 #include "Animation.hpp"
+#include "SpriteNode.hpp"
 
 class Aircraft : public Entity
 {
@@ -34,6 +35,11 @@ public:
 	void Jump();
 	void SetOnGround(bool grounded);
 	bool IsOnGround() const;
+
+	void AttachGun(const TextureHolder& textures, TextureID textureId, const sf::IntRect& textureRect, const sf::Vector2f& offset);
+	void AimGunAt(const sf::Vector2f& worldPosition);
+	void SetGunOffset(const sf::Vector2f & offset);
+	sf::Vector2f GetGunOffset() const;
 
 private:
 	virtual void DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const;
@@ -74,5 +80,11 @@ private:
 	bool m_is_on_ground;
 	float m_jump_speed;
 
+	std::unique_ptr<sf::Sprite> m_gun_sprite;
+	sf::Vector2f m_gun_offset = { 100.f, 0.f };
+	bool m_has_gun = false;
+	float m_gun_world_rotation = 0.f;
+	float m_gun_current_world_rotation = 0.f;
+	float m_gun_rotation_speed = 720.f;
 };
 

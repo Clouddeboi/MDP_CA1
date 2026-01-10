@@ -23,6 +23,11 @@ struct AircraftData
 	sf::Time m_fire_interval;
 	std::vector<Direction> m_directions;
 	bool m_has_roll_animation;
+	//Gun data
+	bool m_has_gun = false;
+	TextureID m_gun_texture = TextureID::kEntities;
+	sf::IntRect m_gun_texture_rect = sf::IntRect();
+	sf::Vector2f m_gun_offset = sf::Vector2f(0.f, 0.f);
 };
 
 struct ProjectileData
