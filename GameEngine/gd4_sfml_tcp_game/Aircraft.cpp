@@ -242,18 +242,29 @@ void Aircraft::CreateBullet(SceneNode& node, const TextureHolder& textures) cons
 void Aircraft::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset, float y_offset, const TextureHolder& textures) const
 {
 	std::unique_ptr<Projectile> projectile(new Projectile(type, textures));
-	sf::Vector2f offset(x_offset * m_sprite.getGlobalBounds().size.x, y_offset * m_sprite.getGlobalBounds().size.y);
-	
-	if (type == ProjectileType::kAlliedBullet)
-	{
-		const float facing = (m_sprite.getScale().x < 0.f) ? -1.f : 1.f;
-		sf::Vector2f velocity(projectile->GetMaxSpeed() * facing, 0.f);
-		
-		//Place projectile slightly in front of the player on the facing X axis
-		projectile->setPosition(GetWorldPosition() + sf::Vector2f(offset.x + 55.f * facing, offset.y + -50.f));
-		projectile->SetVelocity(velocity);
-	}
-		node.AttachChild(std::move(projectile));
+
+	const sf::Vector2f gunWorldPos = (m_has_gun && m_gun_sprite)
+		? (GetWorldPosition() + RotateVectorDeg(m_gun_offset, m_gun_current_world_rotation))
+		: GetWorldPosition();
+
+	float kSpreadAnglePerUnit = 10.f;
+	const float spreadDeg = x_offset * kSpreadAnglePerUnit;
+
+	const float firingAngleDeg = m_gun_current_world_rotation + spreadDeg;
+	const float firingRad = Utility::ToRadians(firingAngleDeg);
+
+	sf::Vector2f velocity(std::cos(firingRad) * projectile->GetMaxSpeed(),
+		std::sin(firingRad) * projectile->GetMaxSpeed());
+
+	const float forwardOffset = 12.f;
+	sf::Vector2f spawnPos = gunWorldPos + sf::Vector2f(std::cos(firingRad) * forwardOffset,
+		std::sin(firingRad) * forwardOffset);
+
+	projectile->setPosition(spawnPos);
+	projectile->SetVelocity(velocity);
+	projectile->setRotation(sf::degrees(firingAngleDeg));
+
+	node.AttachChild(std::move(projectile));
 }
 
 sf::FloatRect Aircraft::GetBoundingRect() const
