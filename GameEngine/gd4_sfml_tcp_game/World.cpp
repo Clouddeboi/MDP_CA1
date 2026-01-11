@@ -29,10 +29,11 @@ void World::Update(sf::Time dt)
 {
 	//Scroll the world
 	//m_camera.move({ 0, m_scrollspeed * dt.asSeconds() });
+
 	{
 		Command gravity;
 		//Target only specific entity categories
-		gravity.category = static_cast<int>(ReceiverCategories::kAircraft);
+		gravity.category = static_cast<int>(ReceiverCategories::kAircraft) | static_cast<int>(ReceiverCategories::kProjectile);
 
 		const float gravityAcceleration = 500.f * 9.81f;
 		gravity.action = DerivedAction<Entity>([gravityAcceleration](Entity& e, sf::Time)
@@ -45,6 +46,23 @@ void World::Update(sf::Time dt)
 			});
 
 		m_scenegraph.OnCommand(gravity, dt);
+	}
+
+	{
+		Command projectileGravity;
+		projectileGravity.category = static_cast<int>(ReceiverCategories::kProjectile);
+
+		//Smaller gravity for bullets so they don't drop too fast
+		const float projectileGravityAcceleration = 5.f;
+		projectileGravity.action = DerivedAction<Entity>([projectileGravityAcceleration](Entity& e, sf::Time)
+			{
+				if (e.IsUsingPhysics())
+				{
+					e.AddForce({ 0.f, projectileGravityAcceleration * e.GetMass() });
+				}
+			});
+
+		m_scenegraph.OnCommand(projectileGravity, dt);
 	}
 
 	if (m_player_aircraft)

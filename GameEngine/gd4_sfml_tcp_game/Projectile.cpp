@@ -15,6 +15,14 @@ Projectile::Projectile(ProjectileType type, const TextureHolder& textures)
 {
     Utility::CentreOrigin(m_sprite);
 
+    SetUsePhysics(true);
+
+    if (m_type == ProjectileType::kAlliedBullet || m_type == ProjectileType::kEnemyBullet)
+    {
+        SetMass(0.1f);
+        SetLinearDrag(0.0f);
+    }
+
     //Add particle system for missiles
     if (IsGuided())
     {
