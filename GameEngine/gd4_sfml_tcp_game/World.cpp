@@ -459,6 +459,12 @@ void World::HandleCollisions()
 			auto& projectile = static_cast<Projectile&>(*pair.second);
 			//Collision response
 			aircraft.Damage(projectile.GetDamage());
+			
+			const float kProjectileKnockbackMultiplier = 5.f;
+			const sf::Time kProjectileKnockbackDuration = sf::seconds(0.12f);
+			sf::Vector2f knockbackVel = projectile.GetVelocity() * kProjectileKnockbackMultiplier;
+			aircraft.ApplyKnockback(knockbackVel, kProjectileKnockbackDuration);
+
 			projectile.Destroy();
 		}
 		else if (MatchesCategories(pair, ReceiverCategories::kProjectile, ReceiverCategories::kPlatform))
