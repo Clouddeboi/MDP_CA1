@@ -452,6 +452,15 @@ void World::HandleCollisions()
 			aircraft.Damage(projectile.GetDamage());
 			projectile.Destroy();
 		}
+		else if (MatchesCategories(pair, ReceiverCategories::kPlayerAircraft, ReceiverCategories::kProjectile))
+		{
+			//Player can damage themselves with their own projectiles
+			auto& aircraft = static_cast<Aircraft&>(*pair.first);
+			auto& projectile = static_cast<Projectile&>(*pair.second);
+			//Collision response
+			aircraft.Damage(projectile.GetDamage());
+			projectile.Destroy();
+		}
 		else if (MatchesCategories(pair, ReceiverCategories::kProjectile, ReceiverCategories::kPlatform))
 		{
 			auto& projectile = static_cast<Projectile&>(*pair.first);
