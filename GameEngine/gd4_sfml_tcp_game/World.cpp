@@ -452,6 +452,11 @@ void World::HandleCollisions()
 			aircraft.Damage(projectile.GetDamage());
 			projectile.Destroy();
 		}
+		else if (MatchesCategories(pair, ReceiverCategories::kProjectile, ReceiverCategories::kPlatform))
+		{
+			auto& projectile = static_cast<Projectile&>(*pair.first);
+			projectile.Destroy();
+		}
 		else if (MatchesCategories(pair, ReceiverCategories::kAircraft, ReceiverCategories::kPlatform))
 		{
 			auto& player = static_cast<Aircraft&>(*pair.first);

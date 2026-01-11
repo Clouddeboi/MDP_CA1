@@ -59,7 +59,16 @@ unsigned int Projectile::GetCategory() const
  
 sf::FloatRect Projectile::GetBoundingRect() const
 {
-    return GetWorldTransform().transformRect(m_sprite.getGlobalBounds());
+    //Smaller, centered hitbox so collisions don't use the full sprite cell
+    const auto& texRect = Table[static_cast<int>(m_type)].m_texture_rect;
+    sf::Vector2f texSize(static_cast<float>(texRect.size.x), static_cast<float>(texRect.size.y));
+
+    float shrinkFactor = 0.35f;
+
+    sf::Vector2f hitSize = texSize * shrinkFactor;
+
+    sf::Vector2f worldCenter = GetWorldPosition();
+    return sf::FloatRect(worldCenter - hitSize * 0.5f, hitSize);
 }
 
 float Projectile::GetMaxSpeed() const
