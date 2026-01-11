@@ -89,11 +89,11 @@ void World::Update(sf::Time dt)
 	}
 	AdaptPlayerVelocity();
 
-	m_scenegraph.RemoveWrecks();
 	m_scenegraph.Update(dt, m_command_queue);
 
 	AdaptPlayerPosition();
 	HandleCollisions();	
+	m_scenegraph.RemoveWrecks();
 }
 
 void World::Draw()
