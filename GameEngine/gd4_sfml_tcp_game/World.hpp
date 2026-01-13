@@ -26,6 +26,7 @@ public:
 	bool HasPlayerReachedEnd() const;
 
 	void SetPlayerAimDirection(const sf::Vector2f& direction);
+	void AimPlayerAtMouse();
 
 private:
 	void LoadTextures();

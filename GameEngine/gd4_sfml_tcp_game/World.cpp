@@ -70,13 +70,6 @@ void World::Update(sf::Time dt)
 		sf::Vector2f playerVel = m_player_aircraft->GetVelocity();
 		if (!m_player_aircraft->IsKnockbackActive())
 			m_player_aircraft->SetVelocity(0.f, playerVel.y);
-
-		//if (auto* window = dynamic_cast<sf::RenderWindow*>(&m_target))
-		//{
-		//	sf::Vector2i mousePixel = sf::Mouse::getPosition(*window);
-		//	sf::Vector2f mouseWorld = m_target.mapPixelToCoords(mousePixel, m_camera);
-		//	m_player_aircraft->AimGunAt(mouseWorld);
-		//}
 	}
 
 	DestroyEntitiesOutsideView();
@@ -569,6 +562,19 @@ void World::SetPlayerAimDirection(const sf::Vector2f& direction)
 	sf::Vector2f playerPos = m_player_aircraft->GetWorldPosition();
 	sf::Vector2f aimPoint = playerPos + direction * kAimDistance;
 	m_player_aircraft->AimGunAt(aimPoint);
+}
+
+void World::AimPlayerAtMouse()
+{
+	if (!m_player_aircraft)
+		return;
+
+		if (auto* window = dynamic_cast<sf::RenderWindow*>(&m_target))
+		{
+			sf::Vector2i mousePixel = sf::Mouse::getPosition(*window);
+			sf::Vector2f mouseWorld = m_target.mapPixelToCoords(mousePixel, m_camera);
+			m_player_aircraft->AimGunAt(mouseWorld);
+		}
 }
 
 void World::UpdateSounds()

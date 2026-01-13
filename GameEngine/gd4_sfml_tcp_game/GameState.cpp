@@ -56,6 +56,10 @@ bool GameState::Update(sf::Time dt)
 	{
 		m_world.SetPlayerAimDirection(aim);
 	}
+	else
+	{
+		m_world.AimPlayerAtMouse();
+	}
 	return true;
 }
 

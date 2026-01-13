@@ -28,7 +28,7 @@ Player::Player(): m_current_mission_status(MissionStatus::kMissionRunning)
 
     //Using mouse inputs for firing bullets instead
     m_mouse_binding[sf::Mouse::Button::Left] = Action::kBulletFire;
-    m_joystick_button_binding[1] = Action::kBulletFire;
+    m_joystick_button_binding[2] = Action::kBulletFire;
 
     //Set initial action bindings
     InitialiseActions();
