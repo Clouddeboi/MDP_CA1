@@ -101,16 +101,16 @@ void Player::HandleRealTimeInput(CommandQueue& command_queue)
 
     if (m_joystick_id >= 0 && sf::Joystick::isConnected(static_cast<unsigned int>(m_joystick_id)))
     {
-        float lx = 0.f;
+        float leftStickPositionX = 0.f;
         if (sf::Joystick::hasAxis(static_cast<unsigned int>(m_joystick_id), m_left_stick_axis))
-            lx = sf::Joystick::getAxisPosition(static_cast<unsigned int>(m_joystick_id), m_left_stick_axis);
+            leftStickPositionX = sf::Joystick::getAxisPosition(static_cast<unsigned int>(m_joystick_id), m_left_stick_axis);
 
-        if (lx > m_joystick_deadzone)
+        if (leftStickPositionX > m_joystick_deadzone)
         {
             if (IsRealTimeAction(Action::kMoveRight))
                 command_queue.Push(m_action_binding[Action::kMoveRight]);
         }
-        else if (lx < -m_joystick_deadzone)
+        else if (leftStickPositionX < -m_joystick_deadzone)
         {
             if (IsRealTimeAction(Action::kMoveLeft))
                 command_queue.Push(m_action_binding[Action::kMoveLeft]);
@@ -217,24 +217,24 @@ sf::Vector2f Player::GetJoystickAim() const
     if (m_joystick_id < 0 || !sf::Joystick::isConnected(static_cast<unsigned int>(m_joystick_id)))
         return { 0.f, 0.f };
 
-    float rx = 0.f;
-    float ry = 0.f;
+    float right_stick_x = 0.f;
+    float right_stick_y = 0.f;
 
     if (sf::Joystick::hasAxis(static_cast<unsigned int>(m_joystick_id), m_right_stick_axis_x))
-        rx = sf::Joystick::getAxisPosition(static_cast<unsigned int>(m_joystick_id), m_right_stick_axis_x);
+        right_stick_x = sf::Joystick::getAxisPosition(static_cast<unsigned int>(m_joystick_id), m_right_stick_axis_x);
 
     if (sf::Joystick::hasAxis(static_cast<unsigned int>(m_joystick_id), m_right_stick_axis_y))
-        ry = sf::Joystick::getAxisPosition(static_cast<unsigned int>(m_joystick_id), m_right_stick_axis_y);
+        right_stick_y = sf::Joystick::getAxisPosition(static_cast<unsigned int>(m_joystick_id), m_right_stick_axis_y);
 
-    sf::Vector2f v(rx / 100.f, ry / 100.f);
+    sf::Vector2f stick_vec(right_stick_x / 100.f, right_stick_y / 100.f);
 
     const float deadzoneNorm = m_joystick_deadzone / 100.f;
-    if (std::hypot(v.x, v.y) < deadzoneNorm)
+    if (std::hypot(stick_vec.x, stick_vec.y) < deadzoneNorm)
         return { 0.f, 0.f };
 
-    float mag = std::hypot(v.x, v.y);
+    float mag = std::hypot(stick_vec.x, stick_vec.y);
     if (mag > 0.f)
-        return v / mag;
+        return stick_vec / mag;
     return { 0.f, 0.f };
 }
 

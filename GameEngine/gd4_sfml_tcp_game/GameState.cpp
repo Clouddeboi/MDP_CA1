@@ -16,13 +16,12 @@ GameState::GameState(StateStack& stack, Context context) : State(stack, context)
 			std::cout << "Controller connected at startup: id=" << i
 				<< " name=\"" << id.name.toAnsiString() << "\"\n";
 
-			// Auto-assign the first connected joystick to the player if not assigned
 			if (m_player.GetJoystickId() < 0)
 			{
 				m_player.SetJoystickId(static_cast<int>(i));
 				std::cout << "[GAME] Assigned joystick " << i << " to player\n";
 			}
-			break; // only assign a single joystick here (first found)
+			break;
 		}
 	}
 }
