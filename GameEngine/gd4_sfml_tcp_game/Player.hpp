@@ -11,7 +11,7 @@ class Command;
 class Player
 {
 public:
-	Player();
+	Player(int player_id = 0);
 	void HandleEvent(const sf::Event& event, CommandQueue& command_queue);
 	void HandleRealTimeInput(CommandQueue& command_queue);
 
@@ -32,6 +32,8 @@ public:
 	void SetMissionStatus(MissionStatus status);
 	MissionStatus GetMissionStatus() const;
 
+	int GetPlayerId() const;
+
 private:
 	void InitialiseActions();
 	static bool IsRealTimeAction(Action action);
@@ -45,6 +47,7 @@ private:
 	std::map<Action, Command> m_action_binding;
 	MissionStatus m_current_mission_status;
 
+	int m_player_id;
 	int m_joystick_id = -1;
 	float m_joystick_deadzone = 15.f;
 

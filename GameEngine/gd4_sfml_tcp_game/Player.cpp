@@ -16,7 +16,7 @@ struct AircraftMover
     sf::Vector2f velocity;
 };
 
-Player::Player(): m_current_mission_status(MissionStatus::kMissionRunning)
+Player::Player(int player_id): m_current_mission_status(MissionStatus::kMissionRunning)
 {
     //Set initial key bindings
     m_key_binding[sf::Keyboard::Key::A] = Action::kMoveLeft;
@@ -32,6 +32,21 @@ Player::Player(): m_current_mission_status(MissionStatus::kMissionRunning)
 
     //Set initial action bindings
     InitialiseActions();
+
+    ReceiverCategories player_category;
+    if (m_player_id == 0)
+    {
+        player_category = ReceiverCategories::kPlayer1;
+    }
+    else if (m_player_id == 1)
+    {
+        player_category = ReceiverCategories::kPlayer2;
+    }
+    else
+    {
+        //Fallback to generic player aircraft
+        player_category = ReceiverCategories::kPlayerAircraft;
+    }
 
     //Assign all categories to a player's aircraft
     for (auto& pair : m_action_binding)
@@ -246,6 +261,11 @@ void Player::SetMissionStatus(MissionStatus status)
 MissionStatus Player::GetMissionStatus() const
 {
     return m_current_mission_status;
+}
+
+int Player::GetPlayerId() const
+{
+    return m_player_id;
 }
 
 void Player::InitialiseActions()
