@@ -16,18 +16,19 @@ struct AircraftMover
     sf::Vector2f velocity;
 };
 
-Player::Player(int player_id): m_current_mission_status(MissionStatus::kMissionRunning)
+Player::Player(int player_id) : m_player_id(player_id), m_current_mission_status(MissionStatus::kMissionRunning)
 {
     //Set initial key bindings
-    m_key_binding[sf::Keyboard::Key::A] = Action::kMoveLeft;
-    m_key_binding[sf::Keyboard::Key::D] = Action::kMoveRight;
+    if (m_player_id == 0)
+    {
+        m_key_binding[sf::Keyboard::Key::A] = Action::kMoveLeft;
+        m_key_binding[sf::Keyboard::Key::D] = Action::kMoveRight;
+        m_key_binding[sf::Keyboard::Key::Space] = Action::kJump;
 
-    //Instead of moving up or down, the players will be able to jump to move up and physics will drag them down
-    m_key_binding[sf::Keyboard::Key::Space] = Action::kJump;
+        m_mouse_binding[sf::Mouse::Button::Left] = Action::kBulletFire;
+    }
+
     m_joystick_button_binding[0] = Action::kJump;
-
-    //Using mouse inputs for firing bullets instead
-    m_mouse_binding[sf::Mouse::Button::Left] = Action::kBulletFire;
     m_joystick_button_binding[2] = Action::kBulletFire;
 
     //Set initial action bindings
@@ -51,8 +52,12 @@ Player::Player(int player_id): m_current_mission_status(MissionStatus::kMissionR
     //Assign all categories to a player's aircraft
     for (auto& pair : m_action_binding)
     {
-        pair.second.category = static_cast<unsigned int>(ReceiverCategories::kPlayerAircraft);
+        pair.second.category = static_cast<unsigned int>(player_category);
     }
+
+    std::cout << "[DEBUG] Player " << m_player_id << " initialized with category " << static_cast<int>(player_category)
+        << " and " << m_action_binding.size() << " action bindings\n";
+    std::cout << "[DEBUG] Key bindings: " << m_key_binding.size() << "\n";
 
 	//Default joystick id to none
     m_joystick_id = -1;
