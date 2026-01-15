@@ -223,41 +223,41 @@ void World::AdaptPlayerPosition()
 	sf::Vector2f oldPos = m_player_aircraft->getPosition();
 	sf::Vector2f position = oldPos;
 
-	const float leftBound = view_bounds.position.x + border_distance;
-	const float rightBound = view_bounds.position.x + view_bounds.size.x - border_distance;
-	const float topBound = view_bounds.position.y + border_distance;
-	const float bottomBound = view_bounds.position.y + view_bounds.size.y - border_distance;
+	const float left_bound = view_bounds.position.x + border_distance;
+	const float right_bound = view_bounds.position.x + view_bounds.size.x - border_distance;
+	const float top_bound = view_bounds.position.y + border_distance;
+	const float bottom_bound = view_bounds.position.y + view_bounds.size.y - border_distance;
 
-	position.x = std::max(position.x, leftBound);
-	position.x = std::min(position.x, rightBound);
-	position.y = std::max(position.y, topBound);
-	position.y = std::min(position.y, bottomBound);
+	position.x = std::max(position.x, left_bound);
+	position.x = std::min(position.x, right_bound);
+	position.y = std::max(position.y, top_bound);
+	position.y = std::min(position.y, bottom_bound);
 	m_player_aircraft->setPosition(position);
 
 	if (!m_player_aircraft->IsKnockbackActive())
 	{
 		//Edge Detection
-		bool hitLeft = (position.x == leftBound) && (oldPos.x < position.x);
-		bool hitRight = (position.x == rightBound) && (oldPos.x > position.x);
-		bool hitTop = (position.y == topBound) && (oldPos.y < position.y);
-		bool hitBottom = (position.y == bottomBound) && (oldPos.y > position.y);
+		bool hit_left = (position.x == left_bound) && (oldPos.x < position.x);
+		bool hit_right = (position.x == right_bound) && (oldPos.x > position.x);
+		bool hit_top = (position.y == top_bound) && (oldPos.y < position.y);
+		bool hit_bottom = (position.y == bottom_bound) && (oldPos.y > position.y);
 
-		if (hitLeft || hitRight || hitTop || hitBottom)
+		if (hit_left || hit_right || hit_top || hit_bottom)
 		{
-			const float kKnockbackSpeedX = 2500.f;
-			const float kKnockbackSpeedY = 2000.f;
+			const float k_knockback_speed_x = 2500.f;
+			const float k_knockback_speed_y = 2000.f;
 			const sf::Time kKnockbackDuration = sf::seconds(0.2f);
 
-			float vx = 0.f;
-			float vy = 0.f;
+			float velocity_x = 0.f;
+			float velocity_y = 0.f;
 			
 			//Push in opposite direction to the edge hit
-			if (hitLeft)  vx = +kKnockbackSpeedX;
-			if (hitRight) vx = -kKnockbackSpeedX;
-			if (hitTop)   vy = +kKnockbackSpeedY;
-			if (hitBottom)vy = -kKnockbackSpeedY;
+			if (hit_left) velocity_x = +k_knockback_speed_x;
+			if (hit_right) velocity_x = -k_knockback_speed_x;
+			if (hit_top) velocity_y = +k_knockback_speed_y;
+			if (hit_bottom) velocity_y = -k_knockback_speed_y;
 
-			m_player_aircraft->ApplyKnockback({ vx, vy }, kKnockbackDuration);
+			m_player_aircraft->ApplyKnockback({ velocity_x, velocity_y }, kKnockbackDuration);
 		}
 	}
 }
@@ -453,10 +453,10 @@ void World::HandleCollisions()
 			//Collision response
 			aircraft.Damage(projectile.GetDamage());
 			
-			const float kProjectileKnockbackMultiplier = 5.f;
-			const sf::Time kProjectileKnockbackDuration = sf::seconds(0.12f);
-			sf::Vector2f knockbackVel = projectile.GetVelocity() * kProjectileKnockbackMultiplier;
-			aircraft.ApplyKnockback(knockbackVel, kProjectileKnockbackDuration);
+			const float k_projectile_knockback_multiplier = 5.f;
+			const sf::Time k_projectile_knockback_duration = sf::seconds(0.12f);
+			sf::Vector2f knockback_vel = projectile.GetVelocity() * k_projectile_knockback_multiplier;
+			aircraft.ApplyKnockback(knockback_vel, k_projectile_knockback_duration);
 
 			projectile.Destroy();
 		}
@@ -470,37 +470,37 @@ void World::HandleCollisions()
 			auto& player = static_cast<Aircraft&>(*pair.first);
 			auto& platform = static_cast<Platform&>(*pair.second);
 
-			sf::FloatRect playerRect = player.GetBoundingRect();
-			sf::FloatRect platformRect = platform.GetBoundingRect();
+			sf::FloatRect player_rect = player.GetBoundingRect();
+			sf::FloatRect platform_rect = platform.GetBoundingRect();
 
 			//Centers
-			const sf::Vector2f playerCenter{
-				playerRect.position.x + playerRect.size.x * 0.5f,
-				playerRect.position.y + playerRect.size.y * 0.5f
+			const sf::Vector2f player_center{
+				player_rect.position.x + player_rect.size.x * 0.5f,
+				player_rect.position.y + player_rect.size.y * 0.5f
 			};
 			const sf::Vector2f platformCenter{
-				platformRect.position.x + platformRect.size.x * 0.5f,
-				platformRect.position.y + platformRect.size.y * 0.5f
+				platform_rect.position.x + platform_rect.size.x * 0.5f,
+				platform_rect.position.y + platform_rect.size.y * 0.5f
 			};
 
 			//Half extents
-			const sf::Vector2f playerHalf{ playerRect.size.x * 0.5f, playerRect.size.y * 0.5f };
-			const sf::Vector2f platformHalf{ platformRect.size.x * 0.5f, platformRect.size.y * 0.5f };
+			const sf::Vector2f player_half{ player_rect.size.x * 0.5f, player_rect.size.y * 0.5f };
+			const sf::Vector2f platform_half{ platform_rect.size.x * 0.5f, platform_rect.size.y * 0.5f };
 
 			//Delta between centers
-			const float deltaX = playerCenter.x - platformCenter.x;
-			const float deltaY = playerCenter.y - platformCenter.y;
+			const float delta_x = player_center.x - platformCenter.x;
+			const float delta_y = player_center.y - platformCenter.y;
 
-			const float overlapX = (playerHalf.x + platformHalf.x) - std::abs(deltaX);
-			const float overlapY = (playerHalf.y + platformHalf.y) - std::abs(deltaY);
+			const float overlap_x = (player_half.x + platform_half.x) - std::abs(delta_x);
+			const float overlap_y = (player_half.y + platform_half.y) - std::abs(delta_y);
 
-			if (overlapX <= 0.f || overlapY <= 0.f)
+			if (overlap_x <= 0.f || overlap_y <= 0.f)
 				continue;
 
-			if (overlapX < overlapY)
+			if (overlap_x < overlap_y)
 			{
 				//Side collision: push horizontally away from platform center
-				const float push = (deltaX > 0.f) ? overlapX : -overlapX;
+				const float push = (delta_x > 0.f) ? overlap_x : -overlap_x;
 				player.move({ push, 0.f });
 
 				//Stop horizontal movement so player does not keep penetrating
@@ -513,18 +513,18 @@ void World::HandleCollisions()
 				//Vertical collision
 				//If player coming from above and moving downward
 				const sf::Vector2f vel = player.GetVelocity();
-				if (deltaY < 0.f && vel.y > 0.f)
+				if (delta_y < 0.f && vel.y > 0.f)
 				{
 					//land on top of platform: position player's bottom at platform top
-					const float platformTop = platformRect.position.y;
-					const float newPlayerCenterY = platformTop - playerHalf.y;
-					const float worldDeltaY = newPlayerCenterY - player.GetWorldPosition().y;
-					player.move({ 0.f, worldDeltaY });
+					const float platformTop = platform_rect.position.y;
+					const float newplayer_centerY = platformTop - player_half.y;
+					const float worlddelta_y = newplayer_centerY - player.GetWorldPosition().y;
+					player.move({ 0.f, worlddelta_y });
 
 					//Stop downward motion and clear forces
-					sf::Vector2f v = player.GetVelocity();
-					if (v.y > 0.f) v.y = 0.f;
-					player.SetVelocity(v);
+					sf::Vector2f input_vector = player.GetVelocity();
+					if (input_vector.y > 0.f) input_vector.y = 0.f;
+					player.SetVelocity(input_vector);
 					player.ClearForces();
 
 					playerGroundedThisFrame = true;
@@ -532,13 +532,13 @@ void World::HandleCollisions()
 				else
 				{
 					//Hit from below: push player downward
-					const float push = (deltaY > 0.f) ? overlapY : -overlapY;
+					const float push = (delta_y > 0.f) ? overlap_y : -overlap_y;
 					player.move({ 0.f, push });
 
 					//If pushed up/down, stop vertical velocity
-					sf::Vector2f v = player.GetVelocity();
-					v.y = 0.f;
-					player.SetVelocity(v);
+					sf::Vector2f input_vector = player.GetVelocity();
+					input_vector.y = 0.f;
+					player.SetVelocity(input_vector);
 				}
 			}
 		}
@@ -559,9 +559,9 @@ void World::SetPlayerAimDirection(const sf::Vector2f& direction)
 		return;
 
 	const float kAimDistance = 1000.f;
-	sf::Vector2f playerPos = m_player_aircraft->GetWorldPosition();
-	sf::Vector2f aimPoint = playerPos + direction * kAimDistance;
-	m_player_aircraft->AimGunAt(aimPoint);
+	sf::Vector2f player_pos = m_player_aircraft->GetWorldPosition();
+	sf::Vector2f aim_point = player_pos + direction * kAimDistance;
+	m_player_aircraft->AimGunAt(aim_point);
 }
 
 void World::AimPlayerAtMouse()
@@ -571,9 +571,9 @@ void World::AimPlayerAtMouse()
 
 		if (auto* window = dynamic_cast<sf::RenderWindow*>(&m_target))
 		{
-			sf::Vector2i mousePixel = sf::Mouse::getPosition(*window);
-			sf::Vector2f mouseWorld = m_target.mapPixelToCoords(mousePixel, m_camera);
-			m_player_aircraft->AimGunAt(mouseWorld);
+			sf::Vector2i mouse_pixel = sf::Mouse::getPosition(*window);
+			sf::Vector2f mouse_world = m_target.mapPixelToCoords(mouse_pixel, m_camera);
+			m_player_aircraft->AimGunAt(mouse_world);
 		}
 }
 

@@ -101,16 +101,16 @@ void Player::HandleRealTimeInput(CommandQueue& command_queue)
 
     if (m_joystick_id >= 0 && sf::Joystick::isConnected(static_cast<unsigned int>(m_joystick_id)))
     {
-        float leftStickPositionX = 0.f;
+        float left_stick_position_x = 0.f;
         if (sf::Joystick::hasAxis(static_cast<unsigned int>(m_joystick_id), m_left_stick_axis))
-            leftStickPositionX = sf::Joystick::getAxisPosition(static_cast<unsigned int>(m_joystick_id), m_left_stick_axis);
+            left_stick_position_x = sf::Joystick::getAxisPosition(static_cast<unsigned int>(m_joystick_id), m_left_stick_axis);
 
-        if (leftStickPositionX > m_joystick_deadzone)
+        if (left_stick_position_x > m_joystick_deadzone)
         {
             if (IsRealTimeAction(Action::kMoveRight))
                 command_queue.Push(m_action_binding[Action::kMoveRight]);
         }
-        else if (leftStickPositionX < -m_joystick_deadzone)
+        else if (left_stick_position_x < -m_joystick_deadzone)
         {
             if (IsRealTimeAction(Action::kMoveLeft))
                 command_queue.Push(m_action_binding[Action::kMoveLeft]);

@@ -11,7 +11,7 @@
 namespace
 {
 	const std::vector<AircraftData> Table = InitializeAircraftData();
-	float kRadToDeg = 180.f / 3.14159265358979323846f;
+	float k_rad_to_deg = 180.f / 3.14159265358979323846f;
 
 	static sf::Vector2f RotateVectorDeg(const sf::Vector2f& v, float degrees)
 	{
@@ -243,26 +243,26 @@ void Aircraft::CreateProjectile(SceneNode& node, ProjectileType type, float x_of
 {
 	std::unique_ptr<Projectile> projectile(new Projectile(type, textures));
 
-	const sf::Vector2f gunWorldPos = (m_has_gun && m_gun_sprite)
+	const sf::Vector2f gun_world_pos = (m_has_gun && m_gun_sprite)
 		? (GetWorldPosition() + RotateVectorDeg(m_gun_offset, m_gun_current_world_rotation))
 		: GetWorldPosition();
 
-	float kSpreadAnglePerUnit = 10.f;
-	const float spreadDeg = x_offset * kSpreadAnglePerUnit;
+	float k_spread_angle_per_unit = 10.f;
+	const float spread_deg = x_offset * k_spread_angle_per_unit;
 
-	const float firingAngleDeg = m_gun_current_world_rotation + spreadDeg;
-	const float firingRad = Utility::ToRadians(firingAngleDeg);
+	const float firing_angle_deg = m_gun_current_world_rotation + spread_deg;
+	const float firing_rad = Utility::ToRadians(firing_angle_deg);
 
-	sf::Vector2f velocity(std::cos(firingRad) * projectile->GetMaxSpeed(),
-		std::sin(firingRad) * projectile->GetMaxSpeed());
+	sf::Vector2f velocity(std::cos(firing_rad) * projectile->GetMaxSpeed(),
+		std::sin(firing_rad) * projectile->GetMaxSpeed());
 
-	const float forwardOffset = 12.f;
-	sf::Vector2f spawnPos = gunWorldPos + sf::Vector2f(std::cos(firingRad) * forwardOffset,
-		std::sin(firingRad) * forwardOffset);
+	const float forward_offset = 12.f;
+	sf::Vector2f spawn_pos = gun_world_pos + sf::Vector2f(std::cos(firing_rad) * forward_offset,
+		std::sin(firing_rad) * forward_offset);
 
-	projectile->setPosition(spawnPos);
+	projectile->setPosition(spawn_pos);
 	projectile->SetVelocity(velocity);
-	projectile->setRotation(sf::degrees(firingAngleDeg));
+	projectile->setRotation(sf::degrees(firing_angle_deg));
 
 	node.AttachChild(std::move(projectile));
 }
@@ -290,10 +290,10 @@ void Aircraft::DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) co
 		if (m_has_gun && m_gun_sprite)
 		{
 			//Orbit gun around the aircraft center using the smoothed world rotation.
-			const sf::Vector2f rotatedOffset = RotateVectorDeg(m_gun_offset, m_gun_current_world_rotation);
-			const sf::Vector2f worldPos = GetWorldPosition() + rotatedOffset;
+			const sf::Vector2f rotated_offset = RotateVectorDeg(m_gun_offset, m_gun_current_world_rotation);
+			const sf::Vector2f world_pos = GetWorldPosition() + rotated_offset;
 
-			m_gun_sprite->setPosition(worldPos);
+			m_gun_sprite->setPosition(world_pos);
 			m_gun_sprite->setRotation(sf::degrees(m_gun_current_world_rotation));
 
 			target.draw(*m_gun_sprite);
@@ -315,10 +315,10 @@ void Aircraft::AimGunAt(const sf::Vector2f& worldPosition)
 		return;
 
 	//Desired angle in world space
-	const sf::Vector2f myWorldPos = GetWorldPosition();
-	const float dx = worldPosition.x - myWorldPos.x;
-	const float dy = worldPosition.y - myWorldPos.y;
-	const float worldAngle = std::atan2(dy, dx) * kRadToDeg;
+	const sf::Vector2f my_world_pos = GetWorldPosition();
+	const float dx = worldPosition.x - my_world_pos.x;
+	const float dy = worldPosition.y - my_world_pos.y;
+	const float worldAngle = std::atan2(dy, dx) * k_rad_to_deg;
 
 	m_gun_world_rotation = worldAngle;
 }
