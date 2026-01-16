@@ -3,7 +3,6 @@ enum class ReceiverCategories
 {
 	kNone = 0,
 	kScene = 1 << 0,
-	kPlayerAircraft = 1 << 1,
 	kAlliedAircraft = 1 << 2,
 	kEnemyAircraft = 1 << 3,
 	kAlliedProjectile = 1 << 4,
@@ -14,6 +13,7 @@ enum class ReceiverCategories
 	kPlatform = 1 << 9,
 	kPlayer1 = 1 << 10,
 	kPlayer2 = 1 << 11,
+	kPlayerAircraft = kPlayer1 | kPlayer2,
 
 	kAircraft = kPlayerAircraft | kAlliedAircraft | kEnemyAircraft,
 	kProjectile = kAlliedProjectile | kEnemyProjectile
