@@ -61,8 +61,8 @@ bool GameState::Update(sf::Time dt)
 		}
 		else
 		{
-			//Only player 0 uses mouse aiming
-			if (i == 0)
+			//Only use mouse aiming if player doesn't have a controller
+			if (i == 0 && m_players[i].GetJoystickId() < 0)
 			{
 				m_world.AimPlayerAtMouse(static_cast<int>(i));
 			}

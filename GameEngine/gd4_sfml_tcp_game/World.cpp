@@ -211,7 +211,7 @@ void World::BuildScene()
 		//Enable physics on the player so gravity, impulses, drag affect it
 		player_aircraft->SetUsePhysics(true);
 		player_aircraft->SetMass(1.0f);
-		player_aircraft->SetLinearDrag(1.5f);
+		player_aircraft->SetLinearDrag(0.5f);
 		//Initial vertical velocity zero
 		player_aircraft->SetVelocity(0.f, 0.f);
 
@@ -449,13 +449,18 @@ bool MatchesCategories(SceneNode::Pair& colliders, ReceiverCategories type1, Rec
 	}
 }
 
-
 void World::HandleCollisions()
 {
 	std::set<SceneNode::Pair> collision_pairs;
 	m_scenegraph.CheckSceneCollision(m_scenegraph, collision_pairs);
 
-	bool playerGroundedThisFrame = false;
+	//Track grounded state per player
+	std::map<Aircraft*, bool> player_grounded_state;
+	for (Aircraft* player : m_player_aircrafts)
+	{
+		if (player)
+			player_grounded_state[player] = false;
+	}
 
 	for (SceneNode::Pair pair : collision_pairs)
 	{
@@ -492,7 +497,7 @@ void World::HandleCollisions()
 			auto& projectile = static_cast<Projectile&>(*pair.second);
 			//Collision response
 			aircraft.Damage(projectile.GetDamage());
-			
+
 			const float k_projectile_knockback_multiplier = 5.f;
 			const sf::Time k_projectile_knockback_duration = sf::seconds(0.12f);
 			sf::Vector2f knockback_vel = projectile.GetVelocity() * k_projectile_knockback_multiplier;
@@ -505,7 +510,7 @@ void World::HandleCollisions()
 			auto& projectile = static_cast<Projectile&>(*pair.first);
 			projectile.Destroy();
 		}
-		else if (MatchesCategories(pair, ReceiverCategories::kAircraft, ReceiverCategories::kPlatform))
+		else if (MatchesCategories(pair, ReceiverCategories::kPlayerAircraft, ReceiverCategories::kPlatform))
 		{
 			auto& player = static_cast<Aircraft&>(*pair.first);
 			auto& platform = static_cast<Platform&>(*pair.second);
@@ -567,7 +572,7 @@ void World::HandleCollisions()
 					player.SetVelocity(input_vector);
 					player.ClearForces();
 
-					playerGroundedThisFrame = true;
+					player_grounded_state[&player] = true;
 				}
 				else
 				{
@@ -583,10 +588,11 @@ void World::HandleCollisions()
 			}
 		}
 	}
-	for (Aircraft* player : m_player_aircrafts)
+
+	//Apply grounded state to each player individually
+	for (auto& pair : player_grounded_state)
 	{
-		if (player)
-			player->SetOnGround(playerGroundedThisFrame);
+		pair.first->SetOnGround(pair.second);
 	}
 }
 
