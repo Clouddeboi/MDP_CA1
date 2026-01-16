@@ -9,17 +9,29 @@ std::vector<AircraftData> InitializeAircraftData()
 {
     std::vector<AircraftData> data(static_cast<int>(AircraftType::kAircraftCount));
 
+    //Player 1
     data[static_cast<int>(AircraftType::kEagle)].m_hitpoints = 100;
     data[static_cast<int>(AircraftType::kEagle)].m_speed = 200.f;
     data[static_cast<int>(AircraftType::kEagle)].m_fire_interval = sf::seconds(1);
     data[static_cast<int>(AircraftType::kEagle)].m_texture = TextureID::kEntities;
     data[static_cast<int>(AircraftType::kEagle)].m_texture_rect = sf::IntRect({ 576, 320 }, { 64, 64 });
     data[static_cast<int>(AircraftType::kEagle)].m_has_roll_animation = true;
-
     data[static_cast<int>(AircraftType::kEagle)].m_has_gun = true;
     data[static_cast<int>(AircraftType::kEagle)].m_gun_texture = TextureID::kEntities;
     data[static_cast<int>(AircraftType::kEagle)].m_gun_texture_rect = sf::IntRect({ 512, 192 }, { 64, 64 });
     data[static_cast<int>(AircraftType::kEagle)].m_gun_offset = sf::Vector2f(0.f, -8.f);
+
+    //Player 2
+    data[static_cast<int>(AircraftType::kEaglePlayer2)].m_hitpoints = 100;
+    data[static_cast<int>(AircraftType::kEaglePlayer2)].m_speed = 200.f;
+    data[static_cast<int>(AircraftType::kEaglePlayer2)].m_fire_interval = sf::seconds(1);
+    data[static_cast<int>(AircraftType::kEaglePlayer2)].m_texture = TextureID::kEntities;
+    data[static_cast<int>(AircraftType::kEaglePlayer2)].m_texture_rect = sf::IntRect({ 576, 256 }, { 64, 64 });
+    data[static_cast<int>(AircraftType::kEaglePlayer2)].m_has_roll_animation = true;
+    data[static_cast<int>(AircraftType::kEaglePlayer2)].m_has_gun = true;
+    data[static_cast<int>(AircraftType::kEaglePlayer2)].m_gun_texture = TextureID::kEntities;
+    data[static_cast<int>(AircraftType::kEaglePlayer2)].m_gun_texture_rect = sf::IntRect({ 512, 192 }, { 64, 64 });
+    data[static_cast<int>(AircraftType::kEaglePlayer2)].m_gun_offset = sf::Vector2f(0.f, -8.f);
 
     data[static_cast<int>(AircraftType::kRaptor)].m_hitpoints = 20;
     data[static_cast<int>(AircraftType::kRaptor)].m_speed = 80.f;

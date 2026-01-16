@@ -75,7 +75,7 @@ void World::Update(sf::Time dt)
 	}
 
 	DestroyEntitiesOutsideView();
-	GuideMissiles();
+	//GuideMissiles();
 
 	//Forward commands to the scenegraph
 	while (!m_command_queue.IsEmpty())
@@ -138,6 +138,7 @@ bool World::HasPlayerReachedEnd() const
 void World::LoadTextures()
 {
 	m_textures.Load(TextureID::kEagle, "Media/Textures/Character_Red.png");
+	m_textures.Load(TextureID::kEaglePlayer2, "Media/Textures/Character_Yellow.png");
 	m_textures.Load(TextureID::kRaptor, "Media/Textures/Raptor.png");
 	m_textures.Load(TextureID::kAvenger, "Media/Textures/Avenger.png");
 	m_textures.Load(TextureID::kLandscape, "Media/Textures/Desert.png");
@@ -189,10 +190,11 @@ void World::BuildScene()
 
 	for (int i = 0; i < kMaxPlayers; ++i)
 	{
-		std::unique_ptr<Aircraft> player(new Aircraft(AircraftType::kEagle, m_textures, m_fonts, i));
+		AircraftType player_type = (i == 0) ? AircraftType::kEagle : AircraftType::kEaglePlayer2;
+		std::unique_ptr<Aircraft> player(new Aircraft(player_type, m_textures, m_fonts, i));
 		Aircraft* player_aircraft = player.get();
 
-		// Position players side by side
+		//Position players side by side
 		sf::Vector2f spawn_offset(0.f, 0.f);
 		if (i == 0)
 		{

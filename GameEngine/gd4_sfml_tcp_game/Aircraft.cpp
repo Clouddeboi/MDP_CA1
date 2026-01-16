@@ -7,6 +7,7 @@
 #include "PickupType.hpp"
 #include "Pickup.hpp"
 #include "SoundNode.hpp"
+#include <iostream>
 
 namespace
 {
@@ -29,6 +30,8 @@ TextureID ToTextureID(AircraftType type)
 	case AircraftType::kEagle:
 		return TextureID::kEagle;
 		break;
+	case AircraftType::kEaglePlayer2:
+		return TextureID::kEntities;
 	case AircraftType::kRaptor:
 		return TextureID::kRaptor;
 		break;
@@ -188,6 +191,9 @@ void Aircraft::UpdateTexts()
 
 void Aircraft::UpdateMovementPattern(sf::Time dt)
 {
+	if (m_player_id >= 0)
+		return;
+
 	//Enemy AI
 	const std::vector<Direction>& directions = Table[static_cast<int>(m_type)].m_directions;
 	if (!directions.empty())
@@ -432,7 +438,7 @@ void Aircraft::CheckProjectileLaunch(sf::Time dt, CommandQueue& commands)
 
 bool Aircraft::IsAllied() const
 {
-	return m_type == AircraftType::kEagle;
+	return m_type == AircraftType::kEagle || m_type == AircraftType::kEaglePlayer2;
 }
 
 void Aircraft::CreatePickup(SceneNode& node, const TextureHolder& textures) const

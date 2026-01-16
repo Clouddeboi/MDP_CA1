@@ -3,6 +3,7 @@ enum class TextureID
 {
 	kLandscape,
 	kEagle,
+	kEaglePlayer2,
 	kRaptor,
 	kAvenger,
 	kMissile,
