@@ -1,6 +1,8 @@
 #pragma once
 #include "State.hpp"
 #include "World.hpp"
+#include "Player.hpp"
+#include <array>
 
 class GameState : public State
 {
@@ -12,6 +14,6 @@ public:
 
 private:
 	World m_world;
-	Player& m_player;
+	std::array<Player, 2> m_players;
 };
 
