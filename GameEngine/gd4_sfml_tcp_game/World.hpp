@@ -25,8 +25,10 @@ public:
 	bool HasAlivePlayer() const;
 	bool HasPlayerReachedEnd() const;
 
-	void SetPlayerAimDirection(const sf::Vector2f& direction);
-	void AimPlayerAtMouse();
+	void SetPlayerAimDirection(int player_index, const sf::Vector2f& direction);
+	void AimPlayerAtMouse(int player_index);
+
+	Aircraft* GetPlayerAircraft(int player_index);
 
 private:
 	void LoadTextures();
@@ -71,7 +73,9 @@ private:
 	sf::FloatRect m_world_bounds;
 	sf::Vector2f m_spawn_position;
 	float m_scrollspeed;
-	Aircraft* m_player_aircraft;
+	//Aircraft* m_player_aircraft;
+	std::vector<Aircraft*> m_player_aircrafts;
+
 
 	CommandQueue m_command_queue;
 

@@ -7,6 +7,7 @@
 #include "PickupType.hpp"
 #include "Pickup.hpp"
 #include "SoundNode.hpp"
+#include <iostream>
 
 namespace
 {
@@ -29,6 +30,8 @@ TextureID ToTextureID(AircraftType type)
 	case AircraftType::kEagle:
 		return TextureID::kEagle;
 		break;
+	case AircraftType::kEaglePlayer2:
+		return TextureID::kEntities;
 	case AircraftType::kRaptor:
 		return TextureID::kRaptor;
 		break;
@@ -39,9 +42,10 @@ TextureID ToTextureID(AircraftType type)
 	return TextureID::kEagle;
 }
 
-Aircraft::Aircraft(AircraftType type, const TextureHolder& textures, const FontHolder& fonts)  
+Aircraft::Aircraft(AircraftType type, const TextureHolder& textures, const FontHolder& fonts, int player_id)
 	: Entity(Table[static_cast<int>(type)].m_hitpoints)
 	, m_type(type)
+	, m_player_id(player_id)
 	, m_sprite(textures.Get(Table[static_cast<int>(type)].m_texture), Table[static_cast<int>(type)].m_texture_rect)
 	, m_explosion(textures.Get(TextureID::kExplosion))
 	, m_health_display(nullptr)
@@ -123,10 +127,25 @@ unsigned int Aircraft::GetCategory() const
 {
 	if (IsAllied())
 	{
-		return static_cast<unsigned int>(ReceiverCategories::kPlayerAircraft);
+		//Return player category if player_id is set
+		if (m_player_id == 0)
+			return static_cast<unsigned int>(ReceiverCategories::kPlayer1);
+		else if (m_player_id == 1)
+			return static_cast<unsigned int>(ReceiverCategories::kPlayer2);
+		else
+			return static_cast<unsigned int>(ReceiverCategories::kPlayerAircraft);
 	}
 	return static_cast<unsigned int>(ReceiverCategories::kEnemyAircraft);
+}
 
+void Aircraft::SetPlayerId(int player_id)
+{
+	m_player_id = player_id;
+}
+
+int Aircraft::GetPlayerId() const
+{
+	return m_player_id;
 }
 
 void Aircraft::IncreaseFireRate()
@@ -172,6 +191,9 @@ void Aircraft::UpdateTexts()
 
 void Aircraft::UpdateMovementPattern(sf::Time dt)
 {
+	if (m_player_id >= 0)
+		return;
+
 	//Enemy AI
 	const std::vector<Direction>& directions = Table[static_cast<int>(m_type)].m_directions;
 	if (!directions.empty())
@@ -416,7 +438,7 @@ void Aircraft::CheckProjectileLaunch(sf::Time dt, CommandQueue& commands)
 
 bool Aircraft::IsAllied() const
 {
-	return m_type == AircraftType::kEagle;
+	return m_type == AircraftType::kEagle || m_type == AircraftType::kEaglePlayer2;
 }
 
 void Aircraft::CreatePickup(SceneNode& node, const TextureHolder& textures) const
