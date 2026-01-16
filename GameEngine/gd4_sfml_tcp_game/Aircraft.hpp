@@ -12,8 +12,11 @@
 class Aircraft : public Entity
 {
 public:
-	Aircraft(AircraftType type, const TextureHolder& textures, const FontHolder& fonts);
+	Aircraft(AircraftType type, const TextureHolder& textures, const FontHolder& fonts, int player_id = -1);
 	unsigned int GetCategory() const override;
+
+	void SetPlayerId(int player_id);
+	int GetPlayerId() const;
 
 	void IncreaseFireRate();
 	void IncreaseFireSpread();
@@ -79,6 +82,8 @@ private:
 
 	bool m_is_on_ground;
 	float m_jump_speed;
+
+	int m_player_id = -1;
 
 	std::unique_ptr<sf::Sprite> m_gun_sprite;
 	sf::Vector2f m_gun_offset = { 100.f, 0.f };

@@ -189,7 +189,7 @@ void World::BuildScene()
 
 	for (int i = 0; i < kMaxPlayers; ++i)
 	{
-		std::unique_ptr<Aircraft> player(new Aircraft(AircraftType::kEagle, m_textures, m_fonts));
+		std::unique_ptr<Aircraft> player(new Aircraft(AircraftType::kEagle, m_textures, m_fonts, i));
 		Aircraft* player_aircraft = player.get();
 
 		// Position players side by side
