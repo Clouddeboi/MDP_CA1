@@ -53,11 +53,11 @@ bool GameState::Update(sf::Time dt)
 
 	if (std::hypot(aim.x, aim.y) > kAimDeadzone)
 	{
-		m_world.SetPlayerAimDirection(aim);
+		m_world.SetPlayerAimDirection(0, aim);
 	}
 	else
 	{
-		m_world.AimPlayerAtMouse();
+		m_world.AimPlayerAtMouse(0);
 	}
 	return true;
 }
