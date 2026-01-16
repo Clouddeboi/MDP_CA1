@@ -184,22 +184,40 @@ void World::BuildScene()
 	//finish_sprite->setPosition({ 0.f, -76.f });
 	//m_scene_layers[static_cast<int>(SceneLayers::kBackground)]->AttachChild(std::move(finish_sprite));
 
-	//Add the player's aircraft
-	std::unique_ptr<Aircraft> leader(new Aircraft(AircraftType::kEagle, m_textures, m_fonts));
-	Aircraft* player_aircraft = leader.get();
-	player_aircraft->setPosition(m_spawn_position);
-	//m_player_aircraft->SetVelocity(40.f, m_scrollspeed);
-	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(leader));
+	const int kMaxPlayers = 2;
+	const float kPlayerSpacing = 100.f;
 
-	player_aircraft->SetGunOffset({ 50.f, -10.f });
+	for (int i = 0; i < kMaxPlayers; ++i)
+	{
+		std::unique_ptr<Aircraft> player(new Aircraft(AircraftType::kEagle, m_textures, m_fonts));
+		Aircraft* player_aircraft = player.get();
 
-	//Enable physics on the player so gravity, impulses, drag affect it
-	player_aircraft->SetUsePhysics(true);
-	player_aircraft->SetMass(1.0f);
-	player_aircraft->SetLinearDrag(1.5f);
-	//Initial vertical velocity zero
-	player_aircraft->SetVelocity(0.f, 0.f);
-	m_player_aircrafts.push_back(player_aircraft);
+		// Position players side by side
+		sf::Vector2f spawn_offset(0.f, 0.f);
+		if (i == 0)
+		{
+			spawn_offset.x = -kPlayerSpacing / 2.f;
+		}
+		else if (i == 1)
+		{
+			spawn_offset.x = kPlayerSpacing / 2.f;
+		}
+
+		player_aircraft->setPosition(m_spawn_position + spawn_offset);
+		m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(player));
+
+		player_aircraft->SetGunOffset({ 50.f, -10.f });
+
+		//Enable physics on the player so gravity, impulses, drag affect it
+		player_aircraft->SetUsePhysics(true);
+		player_aircraft->SetMass(1.0f);
+		player_aircraft->SetLinearDrag(1.5f);
+		//Initial vertical velocity zero
+		player_aircraft->SetVelocity(0.f, 0.f);
+
+		//Add to players vector
+		m_player_aircrafts.push_back(player_aircraft);
+	}
 
 	//Platforms
 	sf::Vector2f platformSize(720.f, 100.f);
