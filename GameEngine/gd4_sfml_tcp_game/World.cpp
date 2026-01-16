@@ -14,13 +14,16 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	,m_sounds(sounds)
 	,m_scenegraph(ReceiverCategories::kNone)
 	,m_scene_layers()
-	,m_world_bounds({ 0.f,0.f }, { m_camera.getSize().x, 720.f })
-	,m_spawn_position(m_camera.getSize().x/2.f, m_world_bounds.size.y - m_camera.getSize().y/2.f)
+	,m_world_bounds({ 0.f,0.f }, { 1024.f, 1024.f })
+	,m_spawn_position(m_world_bounds.size.x / 2.f, m_world_bounds.size.y - 300.f)
 	,m_scrollspeed(0.f)//Setting it to 0 since we don't want our players to move up automatically
 	,m_scene_texture({ m_target.getSize().x, m_target.getSize().y })
 {
 	LoadTextures();
 	BuildScene();
+	m_camera.setCenter(m_spawn_position);
+
+	m_camera.zoom(1.35f);
 	m_camera.setCenter(m_spawn_position);
 }
 
@@ -93,15 +96,15 @@ void World::Update(sf::Time dt)
 
 void World::Draw()
 {
-	if (PostEffect::IsSupported())
-	{
-		m_scene_texture.clear();
-		m_scene_texture.setView(m_camera);
-		m_scene_texture.draw(m_scenegraph);
-		m_scene_texture.display();
-		m_bloom_effect.Apply(m_scene_texture, m_target);
-	}
-	else
+	//if (PostEffect::IsSupported())
+	//{
+	//	m_scene_texture.clear();
+	//	m_scene_texture.setView(m_camera);
+	//	m_scene_texture.draw(m_scenegraph);
+	//	m_scene_texture.display();
+	//	m_bloom_effect.Apply(m_scene_texture, m_target);
+	//}
+	//else
 	{
 		m_target.setView(m_camera);
 		m_target.draw(m_scenegraph);
@@ -152,7 +155,7 @@ void World::LoadTextures()
 	m_textures.Load(TextureID::kFinishLine, "Media/Textures/FinishLine.png");
 
 	m_textures.Load(TextureID::kEntities, "Media/Textures/spritesheet_default.png");
-	m_textures.Load(TextureID::kJungle, "Media/Textures/Jungle.png");
+	m_textures.Load(TextureID::kJungle, "Media/Textures/Background.png");
 	m_textures.Load(TextureID::kExplosion, "Media/Textures/Explosion.png");
 	m_textures.Load(TextureID::kParticle, "Media/Textures/Particle.png");
 
@@ -171,12 +174,25 @@ void World::BuildScene()
 
 	//Prepare the background
 	sf::Texture& texture = m_textures.Get(TextureID::kJungle);
-	sf::IntRect textureRect(m_world_bounds);
 	texture.setRepeated(true);
+
+	// Calculate how much larger the background needs to be due to zoom
+	const float zoomFactor = 1.35f;  // Match your camera zoom value
+	const float extraCoverage = 1.5f;  // Add extra coverage to be safe
+
+	sf::IntRect textureRect(
+		{ 0, 0 },
+		{ static_cast<int>(m_world_bounds.size.x * zoomFactor * extraCoverage),
+		  static_cast<int>(m_world_bounds.size.y * zoomFactor * extraCoverage) }
+	);
 
 	//Add the background sprite to the world
 	std::unique_ptr<SpriteNode> background_sprite(new SpriteNode(texture, textureRect));
-	background_sprite->setPosition({ m_world_bounds.position.x, m_world_bounds.position.y });
+	// Center the background on the world
+	background_sprite->setPosition({
+		m_world_bounds.position.x - (textureRect.size.x - m_world_bounds.size.x) / 2.f,
+		m_world_bounds.position.y - (textureRect.size.y - m_world_bounds.size.y) / 2.f
+		});
 	m_scene_layers[static_cast<int>(SceneLayers::kBackground)]->AttachChild(std::move(background_sprite));
 
 	//Add the finish line
@@ -226,7 +242,7 @@ void World::BuildScene()
 	std::unique_ptr<Platform> platform(new Platform(platformSize, sf::Color(120, 80, 40)));
 	//Position the platform relative to camera center
 	sf::Vector2f center = m_camera.getCenter();
-	platform->setPosition(sf::Vector2f{ 720.f, 720.f });
+	platform->setPosition(sf::Vector2f{ m_spawn_position.x + 100.f / 2.f, m_spawn_position.y + 200.f });
 	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(platform));
 
 	//sf::Vector2f platformSize2(720.f, 100.f);
