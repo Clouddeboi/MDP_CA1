@@ -198,7 +198,6 @@ void World::BuildScene()
 	m_scene_layers[static_cast<int>(SceneLayers::kBackground)]->AttachChild(std::move(background_sprite));
 
 	const int kMaxPlayers = 2;
-	const float kPlayerSpacing = 100.f;
 
 	for (int i = 0; i < kMaxPlayers; ++i)
 	{
@@ -207,17 +206,20 @@ void World::BuildScene()
 		Aircraft* player_aircraft = player.get();
 
 		//Position players side by side
-		sf::Vector2f spawn_offset(0.f, 0.f);
+		sf::Vector2f spawn_position(0.f, 0.f);
 		if (i == 0)
 		{
-			spawn_offset.x = -kPlayerSpacing / 2.f;
+			spawn_position.x = 200.f;
+			spawn_position.y = 0.f;
+
 		}
 		else if (i == 1)
 		{
-			spawn_offset.x = kPlayerSpacing / 2.f;
+			spawn_position.x = 1200.f;
+			spawn_position.y = 0.f;
 		}
 
-		player_aircraft->setPosition(m_spawn_position + spawn_offset);
+		player_aircraft->setPosition(spawn_position);
 		m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(player));
 
 		player_aircraft->SetGunOffset({ 50.f, -10.f });
@@ -234,15 +236,27 @@ void World::BuildScene()
 	}
 
 	//Platforms
-
+	//This unit just needs to be multiplied by the amount of tiles you need to make/place something
 	float tile_unit = 64.f;
 
-	sf::Vector2f platformSize(4.f * tile_unit, 2.f * tile_unit);
-	sf::Texture& platformTexture = m_textures.Get(TextureID::kPlatform);
-	platformTexture.setRepeated(true);
-	std::unique_ptr<Platform> platform(new Platform(platformSize, platformTexture));
-	platform->setPosition(sf::Vector2f{ 3.f * tile_unit, 8.f * tile_unit});
-	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(platform));
+	//Platform sizes
+	sf::Vector2f player_1_spawn_platform_size(4.f * tile_unit, 2.f * tile_unit);
+	sf::Vector2f player_2_spawn_platform_size(4.f * tile_unit, 2.f * tile_unit);
+
+	//Platform textures
+	sf::Texture& brick_platform_texture = m_textures.Get(TextureID::kPlatform);
+
+	brick_platform_texture.setRepeated(true);
+
+	std::unique_ptr<Platform> player_1_spawn_platform(new Platform(player_1_spawn_platform_size, brick_platform_texture));
+	std::unique_ptr<Platform> player_2_spawn_platform(new Platform(player_2_spawn_platform_size, brick_platform_texture));
+
+	//Platform positions
+	player_1_spawn_platform->setPosition(sf::Vector2f{ 3.f * tile_unit, 8.f * tile_unit});
+	player_2_spawn_platform->setPosition(sf::Vector2f{ 18.f * tile_unit, 8.f * tile_unit });
+
+	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(player_1_spawn_platform));
+	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(player_2_spawn_platform));
 	
 	//Add the particle nodes to the scene
 	std::unique_ptr<ParticleNode> smokeNode(new ParticleNode(ParticleType::kSmoke, m_textures));
