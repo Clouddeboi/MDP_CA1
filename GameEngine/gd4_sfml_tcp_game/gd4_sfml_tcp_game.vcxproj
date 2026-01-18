@@ -180,6 +180,7 @@
     <ClInclude Include="Animation.hpp" />
     <ClInclude Include="Application.hpp" />
     <ClInclude Include="BloomEffect.hpp" />
+    <ClInclude Include="Box.hpp" />
     <ClInclude Include="Button.hpp" />
     <ClInclude Include="ButtonType.hpp" />
     <ClInclude Include="Command.hpp" />

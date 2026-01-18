@@ -48,6 +48,7 @@ private:
 	void HandleCollisions();
 	void UpdateSounds();
 	void AddPlatform(float x, float y, float width, float height, float unit);
+	void AddBox(float x, float y);
 
 private:
 	struct SpawnPoint

@@ -14,6 +14,7 @@ enum class ReceiverCategories
 	kPlayer1 = 1 << 10,
 	kPlayer2 = 1 << 11,
 	kPlayerAircraft = kPlayer1 | kPlayer2,
+	kBox = 1 << 12,
 
 	kAircraft = kPlayerAircraft | kAlliedAircraft | kEnemyAircraft,
 	kProjectile = kAlliedProjectile | kEnemyProjectile

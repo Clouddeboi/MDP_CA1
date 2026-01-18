@@ -5,6 +5,7 @@
 #include "SoundNode.hpp"
 #include "Command.hpp"
 #include "Platform.hpp"
+#include "Box.hpp"
 
 World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sounds)
 	:m_target(output_target)
@@ -38,7 +39,9 @@ void World::Update(sf::Time dt)
 	{
 		Command gravity;
 		//Target only specific entity categories
-		gravity.category = static_cast<int>(ReceiverCategories::kAircraft) | static_cast<int>(ReceiverCategories::kProjectile);
+		gravity.category = static_cast<int>(ReceiverCategories::kAircraft) 
+			| static_cast<int>(ReceiverCategories::kProjectile)
+			| static_cast<int>(ReceiverCategories::kBox);
 
 		const float gravityAcceleration = 200.f * 9.81f;
 		gravity.action = DerivedAction<Entity>([gravityAcceleration](Entity& e, sf::Time)
@@ -164,6 +167,7 @@ void World::LoadTextures()
 
 	//Tiles are all 64x64, if used on a platform they need to be (x= 64.f y= 64.f)
 	m_textures.Load(TextureID::kPlatform, "Media/Textures/stone_tile.png");
+	m_textures.Load(TextureID::kBox, "Media/Textures/crate_tile.png");
 }
 
 void World::AddPlatform(float x, float y, float width, float height, float unit)
@@ -177,6 +181,20 @@ void World::AddPlatform(float x, float y, float width, float height, float unit)
 	platform->setPosition(sf::Vector2f{x * unit, y * unit});
 
 	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(platform));
+}
+
+void World::AddBox(float x, float y)
+{
+	const float tile_unit = 64.f;
+	sf::Vector2f boxSize(tile_unit, tile_unit);
+	sf::Texture& boxTexture = m_textures.Get(TextureID::kBox);
+
+	std::unique_ptr<Box> box(new Box(boxSize, boxTexture));
+
+	// Convert top-left to center
+	box->setPosition(sf::Vector2f{x, y});
+
+	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(box));
 }
 
 void World::BuildScene()
@@ -259,6 +277,9 @@ void World::BuildScene()
 	AddPlatform(6.5f, 11.5f, 1.f, 1.f, tile_unit);
 	AddPlatform(14.5f, 11.5f, 1.f, 1.f, tile_unit);
 	AddPlatform(10.5f, 9.f, 4.f, 1.f, tile_unit);
+
+	AddBox(400.f, 600.f);
+	AddBox(500.f, 600.f);
 	
 	//Add the particle nodes to the scene
 	std::unique_ptr<ParticleNode> smokeNode(new ParticleNode(ParticleType::kSmoke, m_textures));
@@ -510,12 +531,33 @@ void World::HandleCollisions()
 			pickup.Destroy();
 			player.PlayLocalSound(m_command_queue, SoundEffect::kCollectPickup);
 		}
+		else if (MatchesCategories(pair, ReceiverCategories::kProjectile, ReceiverCategories::kPlatform))
+		{
+			auto& projectile = static_cast<Projectile&>(*pair.first);
+			projectile.Destroy();
+		}
 		else if (MatchesCategories(pair, ReceiverCategories::kPlayerAircraft, ReceiverCategories::kEnemyProjectile) || MatchesCategories(pair, ReceiverCategories::kEnemyAircraft, ReceiverCategories::kAlliedProjectile))
 		{
 			auto& aircraft = static_cast<Aircraft&>(*pair.first);
 			auto& projectile = static_cast<Projectile&>(*pair.second);
 			//Collision response
 			aircraft.Damage(projectile.GetDamage());
+			projectile.Destroy();
+		}
+		else if (MatchesCategories(pair, ReceiverCategories::kProjectile, ReceiverCategories::kBox))
+		{
+			auto& projectile = static_cast<Projectile&>(*pair.first);
+			auto& box = static_cast<Box&>(*pair.second);
+
+			const float k_projectile_knockback = 50000.f;
+			sf::Vector2f knockback_force = projectile.GetVelocity();
+			float length = std::sqrt(knockback_force.x * knockback_force.x + knockback_force.y * knockback_force.y);
+			if (length > 0.f)
+			{
+				knockback_force = (knockback_force / length) * k_projectile_knockback * box.GetMass();
+				box.AddForce(knockback_force);
+			}
+
 			projectile.Destroy();
 		}
 		else if (MatchesCategories(pair, ReceiverCategories::kPlayerAircraft, ReceiverCategories::kProjectile))
@@ -531,11 +573,6 @@ void World::HandleCollisions()
 			sf::Vector2f knockback_vel = projectile.GetVelocity() * k_projectile_knockback_multiplier;
 			aircraft.ApplyKnockback(knockback_vel, k_projectile_knockback_duration);
 
-			projectile.Destroy();
-		}
-		else if (MatchesCategories(pair, ReceiverCategories::kProjectile, ReceiverCategories::kPlatform))
-		{
-			auto& projectile = static_cast<Projectile&>(*pair.first);
 			projectile.Destroy();
 		}
 		else if (MatchesCategories(pair, ReceiverCategories::kPlayerAircraft, ReceiverCategories::kPlatform))
@@ -612,6 +649,164 @@ void World::HandleCollisions()
 					sf::Vector2f input_vector = player.GetVelocity();
 					input_vector.y = 0.f;
 					player.SetVelocity(input_vector);
+				}
+			}
+		}
+		else if (MatchesCategories(pair, ReceiverCategories::kPlayerAircraft, ReceiverCategories::kBox))
+		{
+			auto& player = static_cast<Aircraft&>(*pair.first);
+			auto& box = static_cast<Box&>(*pair.second);
+
+			sf::FloatRect player_rect = player.GetBoundingRect();
+			sf::FloatRect box_rect = box.GetBoundingRect();
+
+			//Centers
+			const sf::Vector2f player_center{
+				player_rect.position.x + player_rect.size.x * 0.5f,
+				player_rect.position.y + player_rect.size.y * 0.5f
+			};
+			const sf::Vector2f box_center{
+				box_rect.position.x + box_rect.size.x * 0.5f,
+				box_rect.position.y + box_rect.size.y * 0.5f
+			};
+
+			//Half extents
+			const sf::Vector2f player_half{ player_rect.size.x * 0.5f, player_rect.size.y * 0.5f };
+			const sf::Vector2f box_half{ box_rect.size.x * 0.5f, box_rect.size.y * 0.5f };
+
+			//Delta between centers
+			const float delta_x = player_center.x - box_center.x;
+			const float delta_y = player_center.y - box_center.y;
+
+			const float overlap_x = (player_half.x + box_half.x) - std::abs(delta_x);
+			const float overlap_y = (player_half.y + box_half.y) - std::abs(delta_y);
+
+			if (overlap_x <= 0.f || overlap_y <= 0.f)
+				continue;
+
+			if (overlap_x < overlap_y)
+			{
+				//Side collision: push box horizontally
+				const float push = (delta_x > 0.f) ? overlap_x : -overlap_x;
+
+				//Push both player and box apart
+				player.move({ push * 0.5f, 0.f });
+				box.move({ -push * 0.5f, 0.f });
+
+				//Apply force to push the box
+				const float pushForce = 5000.f;
+				float forceDirection = (delta_x > 0.f) ? -1.f : 1.f;
+				box.AddForce({ forceDirection * pushForce * box.GetMass(), 0.f });
+
+				//Stop horizontal movement
+				sf::Vector2f vel = player.GetVelocity();
+				vel.x = 0.f;
+				player.SetVelocity(vel);
+			}
+			else
+			{
+				//Vertical collision
+				const sf::Vector2f vel = player.GetVelocity();
+				if (delta_y < 0.f && vel.y > 0.f)
+				{
+					//Player landing on top of box
+					const float boxTop = box_rect.position.y;
+					const float newplayer_centerY = boxTop - player_half.y;
+					const float worlddelta_y = newplayer_centerY - player.GetWorldPosition().y;
+					player.move({ 0.f, worlddelta_y });
+
+					//Stop downward motion and clear forces
+					sf::Vector2f input_vector = player.GetVelocity();
+					if (input_vector.y > 0.f) input_vector.y = 0.f;
+					player.SetVelocity(input_vector);
+					player.ClearForces();
+
+					player_grounded_state[&player] = true;
+				}
+				else
+				{
+					//Hit from below: push both apart
+					const float push = (delta_y > 0.f) ? overlap_y : -overlap_y;
+					player.move({ 0.f, push * 0.5f });
+					box.move({ 0.f, -push * 0.5f });
+
+					//Stop vertical velocity
+					sf::Vector2f input_vector = player.GetVelocity();
+					input_vector.y = 0.f;
+					player.SetVelocity(input_vector);
+				}
+			}
+		}
+		else if (MatchesCategories(pair, ReceiverCategories::kBox, ReceiverCategories::kPlatform))
+		{
+			auto& box = static_cast<Box&>(*pair.first);
+			auto& platform = static_cast<Platform&>(*pair.second);
+
+			sf::FloatRect box_rect = box.GetBoundingRect();
+			sf::FloatRect platform_rect = platform.GetBoundingRect();
+
+			//Centers
+			const sf::Vector2f box_center{
+				box_rect.position.x + box_rect.size.x * 0.5f,
+				box_rect.position.y + box_rect.size.y * 0.5f
+			};
+			const sf::Vector2f platform_center{
+				platform_rect.position.x + platform_rect.size.x * 0.5f,
+				platform_rect.position.y + platform_rect.size.y * 0.5f
+			};
+
+			//Half extents
+			const sf::Vector2f box_half{ box_rect.size.x * 0.5f, box_rect.size.y * 0.5f };
+			const sf::Vector2f platform_half{ platform_rect.size.x * 0.5f, platform_rect.size.y * 0.5f };
+
+			//Delta between centers
+			const float delta_x = box_center.x - platform_center.x;
+			const float delta_y = box_center.y - platform_center.y;
+
+			const float overlap_x = (box_half.x + platform_half.x) - std::abs(delta_x);
+			const float overlap_y = (box_half.y + platform_half.y) - std::abs(delta_y);
+
+			if (overlap_x <= 0.f || overlap_y <= 0.f)
+				continue;
+
+			if (overlap_x < overlap_y)
+			{
+				//Side collision: push box horizontally
+				const float push = (delta_x > 0.f) ? overlap_x : -overlap_x;
+				box.move({ push, 0.f });
+
+				//Stop horizontal movement
+				sf::Vector2f vel = box.GetVelocity();
+				vel.x = 0.f;
+				box.SetVelocity(vel);
+			}
+			else
+			{
+				//Vertical collision
+				const sf::Vector2f vel = box.GetVelocity();
+				if (delta_y < 0.f && vel.y > 0.f)
+				{
+					//Box landing on platform
+					const float platformTop = platform_rect.position.y;
+					const float newbox_centerY = platformTop - box_half.y;
+					const float worlddelta_y = newbox_centerY - box.GetWorldPosition().y;
+					box.move({ 0.f, worlddelta_y });
+
+					//Stop downward motion and clear forces
+					sf::Vector2f input_vector = box.GetVelocity();
+					if (input_vector.y > 0.f) input_vector.y = 0.f;
+					box.SetVelocity(input_vector);
+					box.ClearForces();
+				}
+				else
+				{
+					//Hit from below: push box upward
+					const float push = (delta_y > 0.f) ? overlap_y : -overlap_y;
+					box.move({ 0.f, push });
+
+					sf::Vector2f input_vector = box.GetVelocity();
+					input_vector.y = 0.f;
+					box.SetVelocity(input_vector);
 				}
 			}
 		}
