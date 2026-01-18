@@ -14,14 +14,20 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	,m_sounds(sounds)
 	,m_scenegraph(ReceiverCategories::kNone)
 	,m_scene_layers()
-	,m_world_bounds({ 0.f,0.f }, { m_camera.getSize().x, 720.f })
-	,m_spawn_position(m_camera.getSize().x/2.f, m_world_bounds.size.y - m_camera.getSize().y/2.f)
+	,m_world_bounds({ 0.f,0.f }, { 1280.f, 1280.f })
+	,m_spawn_position(m_world_bounds.size.x / 2.f, m_world_bounds.size.y - 300.f)
 	,m_scrollspeed(0.f)//Setting it to 0 since we don't want our players to move up automatically
 	,m_scene_texture({ m_target.getSize().x, m_target.getSize().y })
 {
 	LoadTextures();
 	BuildScene();
-	m_camera.setCenter(m_spawn_position);
+
+	sf::Vector2f cameraSize = m_camera.getSize();
+
+	m_camera.zoom(1.35f);
+	sf::Vector2f zoomedSize = cameraSize * 1.35f;
+	m_camera.setCenter({ zoomedSize.x / 2.f, zoomedSize.y / 2.f });
+
 }
 
 void World::Update(sf::Time dt)
@@ -93,15 +99,15 @@ void World::Update(sf::Time dt)
 
 void World::Draw()
 {
-	if (PostEffect::IsSupported())
-	{
-		m_scene_texture.clear();
-		m_scene_texture.setView(m_camera);
-		m_scene_texture.draw(m_scenegraph);
-		m_scene_texture.display();
-		m_bloom_effect.Apply(m_scene_texture, m_target);
-	}
-	else
+	//if (PostEffect::IsSupported())
+	//{
+	//	m_scene_texture.clear();
+	//	m_scene_texture.setView(m_camera);
+	//	m_scene_texture.draw(m_scenegraph);
+	//	m_scene_texture.display();
+	//	m_bloom_effect.Apply(m_scene_texture, m_target);
+	//}
+	//else
 	{
 		m_target.setView(m_camera);
 		m_target.draw(m_scenegraph);
@@ -152,10 +158,12 @@ void World::LoadTextures()
 	m_textures.Load(TextureID::kFinishLine, "Media/Textures/FinishLine.png");
 
 	m_textures.Load(TextureID::kEntities, "Media/Textures/spritesheet_default.png");
-	m_textures.Load(TextureID::kJungle, "Media/Textures/Jungle.png");
+	m_textures.Load(TextureID::kJungle, "Media/Textures/Background.png");
 	m_textures.Load(TextureID::kExplosion, "Media/Textures/Explosion.png");
 	m_textures.Load(TextureID::kParticle, "Media/Textures/Particle.png");
 
+	//Tiles are all 64x64, if used on a platform they need to be (x= 64.f y= 64.f)
+	m_textures.Load(TextureID::kPlatform, "Media/Textures/stone_tile.png");
 }
 
 void World::BuildScene()
@@ -171,22 +179,25 @@ void World::BuildScene()
 
 	//Prepare the background
 	sf::Texture& texture = m_textures.Get(TextureID::kJungle);
-	sf::IntRect textureRect(m_world_bounds);
 	texture.setRepeated(true);
+	const float zoomFactor = 1.35f;
+	const float extraCoverage = 1.5f;
+
+	sf::IntRect textureRect(
+		{ 0, 0 },
+		{ static_cast<int>(m_world_bounds.size.x * zoomFactor * extraCoverage),
+		  static_cast<int>(m_world_bounds.size.y * zoomFactor * extraCoverage) }
+	);
 
 	//Add the background sprite to the world
 	std::unique_ptr<SpriteNode> background_sprite(new SpriteNode(texture, textureRect));
-	background_sprite->setPosition({ m_world_bounds.position.x, m_world_bounds.position.y });
+	background_sprite->setPosition({
+		m_world_bounds.position.x - (textureRect.size.x - m_world_bounds.size.x) / 2.f,
+		m_world_bounds.position.y - (textureRect.size.y - m_world_bounds.size.y) / 2.f
+		});
 	m_scene_layers[static_cast<int>(SceneLayers::kBackground)]->AttachChild(std::move(background_sprite));
 
-	//Add the finish line
-	//sf::Texture& finish_texture = m_textures.Get(TextureID::kFinishLine);
-	//std::unique_ptr<SpriteNode> finish_sprite(new SpriteNode(finish_texture));
-	//finish_sprite->setPosition({ 0.f, -76.f });
-	//m_scene_layers[static_cast<int>(SceneLayers::kBackground)]->AttachChild(std::move(finish_sprite));
-
 	const int kMaxPlayers = 2;
-	const float kPlayerSpacing = 100.f;
 
 	for (int i = 0; i < kMaxPlayers; ++i)
 	{
@@ -195,17 +206,20 @@ void World::BuildScene()
 		Aircraft* player_aircraft = player.get();
 
 		//Position players side by side
-		sf::Vector2f spawn_offset(0.f, 0.f);
+		sf::Vector2f spawn_position(0.f, 0.f);
 		if (i == 0)
 		{
-			spawn_offset.x = -kPlayerSpacing / 2.f;
+			spawn_position.x = 200.f;
+			spawn_position.y = 0.f;
+
 		}
 		else if (i == 1)
 		{
-			spawn_offset.x = kPlayerSpacing / 2.f;
+			spawn_position.x = 1200.f;
+			spawn_position.y = 0.f;
 		}
 
-		player_aircraft->setPosition(m_spawn_position + spawn_offset);
+		player_aircraft->setPosition(spawn_position);
 		m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(player));
 
 		player_aircraft->SetGunOffset({ 50.f, -10.f });
@@ -222,17 +236,27 @@ void World::BuildScene()
 	}
 
 	//Platforms
-	sf::Vector2f platformSize(720.f, 100.f);
-	std::unique_ptr<Platform> platform(new Platform(platformSize, sf::Color(120, 80, 40)));
-	//Position the platform relative to camera center
-	sf::Vector2f center = m_camera.getCenter();
-	platform->setPosition(sf::Vector2f{ 720.f, 720.f });
-	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(platform));
+	//This unit just needs to be multiplied by the amount of tiles you need to make/place something
+	float tile_unit = 64.f;
 
-	//sf::Vector2f platformSize2(720.f, 100.f);
-	//std::unique_ptr<Platform> platform2(new Platform(platformSize2, sf::Color(120, 80, 40)));
-	//platform2->setPosition(sf::Vector2f{ 320.f, 620.f });
-	//m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(platform2));
+	//Platform sizes
+	sf::Vector2f player_1_spawn_platform_size(4.f * tile_unit, 2.f * tile_unit);
+	sf::Vector2f player_2_spawn_platform_size(4.f * tile_unit, 2.f * tile_unit);
+
+	//Platform textures
+	sf::Texture& brick_platform_texture = m_textures.Get(TextureID::kPlatform);
+
+	brick_platform_texture.setRepeated(true);
+
+	std::unique_ptr<Platform> player_1_spawn_platform(new Platform(player_1_spawn_platform_size, brick_platform_texture));
+	std::unique_ptr<Platform> player_2_spawn_platform(new Platform(player_2_spawn_platform_size, brick_platform_texture));
+
+	//Platform positions
+	player_1_spawn_platform->setPosition(sf::Vector2f{ 3.f * tile_unit, 8.f * tile_unit});
+	player_2_spawn_platform->setPosition(sf::Vector2f{ 18.f * tile_unit, 8.f * tile_unit });
+
+	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(player_1_spawn_platform));
+	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(player_2_spawn_platform));
 	
 	//Add the particle nodes to the scene
 	std::unique_ptr<ParticleNode> smokeNode(new ParticleNode(ParticleType::kSmoke, m_textures));
