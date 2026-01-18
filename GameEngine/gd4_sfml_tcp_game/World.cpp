@@ -40,7 +40,7 @@ void World::Update(sf::Time dt)
 		//Target only specific entity categories
 		gravity.category = static_cast<int>(ReceiverCategories::kAircraft) | static_cast<int>(ReceiverCategories::kProjectile);
 
-		const float gravityAcceleration = 500.f * 9.81f;
+		const float gravityAcceleration = 200.f * 9.81f;
 		gravity.action = DerivedAction<Entity>([gravityAcceleration](Entity& e, sf::Time)
 			{
 				if (e.IsUsingPhysics())

@@ -63,7 +63,7 @@ Aircraft::Aircraft(AircraftType type, const TextureHolder& textures, const FontH
 	, m_spawned_pickup(false)
 	, m_played_explosion_sound(false)
 	, m_is_on_ground(true)
-	, m_jump_speed(2500.f)
+	, m_jump_speed(750.f)
 	, m_gun_world_rotation(0.f)
 	, m_gun_current_world_rotation(0.f)
 	, m_gun_rotation_speed(720.f)
