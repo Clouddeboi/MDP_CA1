@@ -10,7 +10,7 @@ PauseState::PauseState(StateStack& stack, Context context)
     , m_instruction_text(context.fonts->Get(Font::kMain))
 {
     //sf::Font& font = context.fonts->Get(Font::kMain);
-    sf::Vector2f view_size = context.window->getView().getSize();
+    sf::Vector2f view_size = context.window->getDefaultView().getSize();
 
     //m_paused_text.setFont(font);
     m_paused_text.setString("Game Paused");

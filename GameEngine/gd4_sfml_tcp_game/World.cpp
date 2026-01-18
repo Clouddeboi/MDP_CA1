@@ -175,10 +175,8 @@ void World::BuildScene()
 	//Prepare the background
 	sf::Texture& texture = m_textures.Get(TextureID::kJungle);
 	texture.setRepeated(true);
-
-	// Calculate how much larger the background needs to be due to zoom
-	const float zoomFactor = 1.35f;  // Match your camera zoom value
-	const float extraCoverage = 1.5f;  // Add extra coverage to be safe
+	const float zoomFactor = 1.35f;
+	const float extraCoverage = 1.5f;
 
 	sf::IntRect textureRect(
 		{ 0, 0 },
@@ -188,7 +186,6 @@ void World::BuildScene()
 
 	//Add the background sprite to the world
 	std::unique_ptr<SpriteNode> background_sprite(new SpriteNode(texture, textureRect));
-	// Center the background on the world
 	background_sprite->setPosition({
 		m_world_bounds.position.x - (textureRect.size.x - m_world_bounds.size.x) / 2.f,
 		m_world_bounds.position.y - (textureRect.size.y - m_world_bounds.size.y) / 2.f
