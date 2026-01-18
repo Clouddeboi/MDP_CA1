@@ -14,17 +14,20 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	,m_sounds(sounds)
 	,m_scenegraph(ReceiverCategories::kNone)
 	,m_scene_layers()
-	,m_world_bounds({ 0.f,0.f }, { 1024.f, 1024.f })
+	,m_world_bounds({ 0.f,0.f }, { 1280.f, 1280.f })
 	,m_spawn_position(m_world_bounds.size.x / 2.f, m_world_bounds.size.y - 300.f)
 	,m_scrollspeed(0.f)//Setting it to 0 since we don't want our players to move up automatically
 	,m_scene_texture({ m_target.getSize().x, m_target.getSize().y })
 {
 	LoadTextures();
 	BuildScene();
-	m_camera.setCenter(m_spawn_position);
+
+	sf::Vector2f cameraSize = m_camera.getSize();
 
 	m_camera.zoom(1.35f);
-	m_camera.setCenter(m_spawn_position);
+	sf::Vector2f zoomedSize = cameraSize * 1.35f;
+	m_camera.setCenter({ zoomedSize.x / 2.f, zoomedSize.y / 2.f });
+
 }
 
 void World::Update(sf::Time dt)
@@ -231,12 +234,14 @@ void World::BuildScene()
 	}
 
 	//Platforms
-	sf::Vector2f platformSize(640.f, 128.f);
+
+	float tile_unit = 64.f;
+
+	sf::Vector2f platformSize(4.f * tile_unit, 2.f * tile_unit);
 	sf::Texture& platformTexture = m_textures.Get(TextureID::kPlatform);
 	platformTexture.setRepeated(true);
-	//Position the platform relative to camera center
 	std::unique_ptr<Platform> platform(new Platform(platformSize, platformTexture));
-	platform->setPosition(sf::Vector2f{ m_spawn_position.x + 100.f / 2.f, m_spawn_position.y + 200.f });
+	platform->setPosition(sf::Vector2f{ 3.f * tile_unit, 8.f * tile_unit});
 	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(platform));
 	
 	//Add the particle nodes to the scene
