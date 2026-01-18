@@ -19,6 +19,22 @@ public:
         m_shape.setOrigin(size * 0.5f);
     }
 
+    explicit Platform(const sf::Vector2f& size, const sf::Texture& texture)
+        : SceneNode(ReceiverCategories::kPlatform)
+        , m_shape(size)
+    {
+        m_shape.setOrigin(size * 0.5f);
+        m_shape.setTexture(&texture);
+
+        // Calculate how many times the texture should repeat
+        sf::Vector2u textureSize = texture.getSize();
+        float repeatX = size.x / static_cast<float>(textureSize.x);
+        float repeatY = size.y / static_cast<float>(textureSize.y);
+
+        // Set texture rect to tile the texture
+        m_shape.setTextureRect({ {0, 0}, {static_cast<int>(size.x), static_cast<int>(size.y)} });
+    }
+
     sf::Vector2f GetSize() const
     {
         return m_shape.getSize();

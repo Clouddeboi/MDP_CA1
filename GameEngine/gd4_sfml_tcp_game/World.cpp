@@ -159,6 +159,8 @@ void World::LoadTextures()
 	m_textures.Load(TextureID::kExplosion, "Media/Textures/Explosion.png");
 	m_textures.Load(TextureID::kParticle, "Media/Textures/Particle.png");
 
+	//Tiles are all 64x64, if used on a platform they need to be (x= 64.f y= 64.f)
+	m_textures.Load(TextureID::kPlatform, "Media/Textures/stone_tile.png");
 }
 
 void World::BuildScene()
@@ -191,12 +193,6 @@ void World::BuildScene()
 		m_world_bounds.position.y - (textureRect.size.y - m_world_bounds.size.y) / 2.f
 		});
 	m_scene_layers[static_cast<int>(SceneLayers::kBackground)]->AttachChild(std::move(background_sprite));
-
-	//Add the finish line
-	//sf::Texture& finish_texture = m_textures.Get(TextureID::kFinishLine);
-	//std::unique_ptr<SpriteNode> finish_sprite(new SpriteNode(finish_texture));
-	//finish_sprite->setPosition({ 0.f, -76.f });
-	//m_scene_layers[static_cast<int>(SceneLayers::kBackground)]->AttachChild(std::move(finish_sprite));
 
 	const int kMaxPlayers = 2;
 	const float kPlayerSpacing = 100.f;
@@ -235,17 +231,13 @@ void World::BuildScene()
 	}
 
 	//Platforms
-	sf::Vector2f platformSize(720.f, 100.f);
-	std::unique_ptr<Platform> platform(new Platform(platformSize, sf::Color(120, 80, 40)));
+	sf::Vector2f platformSize(640.f, 128.f);
+	sf::Texture& platformTexture = m_textures.Get(TextureID::kPlatform);
+	platformTexture.setRepeated(true);
 	//Position the platform relative to camera center
-	sf::Vector2f center = m_camera.getCenter();
+	std::unique_ptr<Platform> platform(new Platform(platformSize, platformTexture));
 	platform->setPosition(sf::Vector2f{ m_spawn_position.x + 100.f / 2.f, m_spawn_position.y + 200.f });
 	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(platform));
-
-	//sf::Vector2f platformSize2(720.f, 100.f);
-	//std::unique_ptr<Platform> platform2(new Platform(platformSize2, sf::Color(120, 80, 40)));
-	//platform2->setPosition(sf::Vector2f{ 320.f, 620.f });
-	//m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(platform2));
 	
 	//Add the particle nodes to the scene
 	std::unique_ptr<ParticleNode> smokeNode(new ParticleNode(ParticleType::kSmoke, m_textures));
