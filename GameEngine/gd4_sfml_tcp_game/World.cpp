@@ -6,6 +6,7 @@
 #include "Command.hpp"
 #include "Platform.hpp"
 #include "Box.hpp"
+#include <iostream>
 
 World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sounds)
 	:m_target(output_target)
@@ -86,17 +87,18 @@ void World::Update(sf::Time dt)
 	DestroyEntitiesOutsideView();
 	//GuideMissiles();
 
+	AdaptPlayerVelocity();
+
 	//Forward commands to the scenegraph
 	while (!m_command_queue.IsEmpty())
 	{
 		m_scenegraph.OnCommand(m_command_queue.Pop(), dt);
 	}
-	AdaptPlayerVelocity();
 
 	m_scenegraph.Update(dt, m_command_queue);
 
 	AdaptPlayerPosition();
-	HandleCollisions();	
+	HandleCollisions();
 	m_scenegraph.RemoveWrecks();
 }
 
@@ -279,7 +281,7 @@ void World::BuildScene()
 	AddPlatform(10.5f, 9.f, 4.f, 1.f, tile_unit);
 
 	AddBox(400.f, 600.f);
-	AddBox(500.f, 600.f);
+	AddBox(700.f, 600.f);
 	
 	//Add the particle nodes to the scene
 	std::unique_ptr<ParticleNode> smokeNode(new ParticleNode(ParticleType::kSmoke, m_textures));
@@ -549,7 +551,7 @@ void World::HandleCollisions()
 			auto& projectile = static_cast<Projectile&>(*pair.first);
 			auto& box = static_cast<Box&>(*pair.second);
 
-			const float k_projectile_knockback = 50000.f;
+			const float k_projectile_knockback = 8000.f;
 			sf::Vector2f knockback_force = projectile.GetVelocity();
 			float length = std::sqrt(knockback_force.x * knockback_force.x + knockback_force.y * knockback_force.y);
 			if (length > 0.f)
@@ -568,8 +570,8 @@ void World::HandleCollisions()
 			//Collision response
 			aircraft.Damage(projectile.GetDamage());
 
-			const float k_projectile_knockback_multiplier = 5.f;
-			const sf::Time k_projectile_knockback_duration = sf::seconds(0.12f);
+			const float k_projectile_knockback_multiplier = 3.5f;
+			const sf::Time k_projectile_knockback_duration = sf::seconds(0.2f);
 			sf::Vector2f knockback_vel = projectile.GetVelocity() * k_projectile_knockback_multiplier;
 			aircraft.ApplyKnockback(knockback_vel, k_projectile_knockback_duration);
 
@@ -808,6 +810,88 @@ void World::HandleCollisions()
 					input_vector.y = 0.f;
 					box.SetVelocity(input_vector);
 				}
+			}
+		}
+		else if (MatchesCategories(pair, ReceiverCategories::kBox, ReceiverCategories::kBox))
+		{
+			auto& box1 = static_cast<Box&>(*pair.first);
+			auto& box2 = static_cast<Box&>(*pair.second);
+
+			sf::FloatRect box1_rect = box1.GetBoundingRect();
+			sf::FloatRect box2_rect = box2.GetBoundingRect();
+
+			//Centers
+			const sf::Vector2f box1_center{
+				box1_rect.position.x + box1_rect.size.x * 0.5f,
+				box1_rect.position.y + box1_rect.size.y * 0.5f
+			};
+			const sf::Vector2f box2_center{
+				box2_rect.position.x + box2_rect.size.x * 0.5f,
+				box2_rect.position.y + box2_rect.size.y * 0.5f
+			};
+
+			//Half extents
+			const sf::Vector2f box1_half{ box1_rect.size.x * 0.5f, box1_rect.size.y * 0.5f };
+			const sf::Vector2f box2_half{ box2_rect.size.x * 0.5f, box2_rect.size.y * 0.5f };
+
+			//Delta between centers
+			const float delta_x = box1_center.x - box2_center.x;
+			const float delta_y = box1_center.y - box2_center.y;
+
+			const float overlap_x = (box1_half.x + box2_half.x) - std::abs(delta_x);
+			const float overlap_y = (box1_half.y + box2_half.y) - std::abs(delta_y);
+
+			if (overlap_x <= 0.f || overlap_y <= 0.f)
+				continue;
+
+			sf::Vector2f vel1 = box1.GetVelocity();
+			sf::Vector2f vel2 = box2.GetVelocity();
+
+			const float mass1 = box1.GetMass();
+			const float mass2 = box2.GetMass();
+			const float total_mass = mass1 + mass2;
+
+			const float bounciness = 0.5f;
+
+			if (overlap_x < overlap_y)
+			{
+				//Horizontal collision
+				const float push = (delta_x > 0.f) ? overlap_x : -overlap_x;
+
+				const float ratio1 = mass2 / total_mass;
+				const float ratio2 = mass1 / total_mass;
+
+				box1.move({ push * ratio1, 0.f });
+				box2.move({ -push * ratio2, 0.f });
+
+				const float relative_velocity = vel1.x - vel2.x;
+				const float impulse = (1.f + bounciness) * relative_velocity / total_mass;
+
+				vel1.x -= impulse * mass2;
+				vel2.x += impulse * mass1;
+
+				box1.SetVelocity(vel1);
+				box2.SetVelocity(vel2);
+			}
+			else
+			{
+				//Vertical collision
+				const float push = (delta_y > 0.f) ? overlap_y : -overlap_y;
+
+				const float ratio1 = mass2 / total_mass;
+				const float ratio2 = mass1 / total_mass;
+
+				box1.move({ 0.f, push * ratio1 });
+				box2.move({ 0.f, -push * ratio2 });
+
+				const float relative_velocity = vel1.y - vel2.y;
+				const float impulse = (1.f + bounciness) * relative_velocity / total_mass;
+
+				vel1.y -= impulse * mass2;
+				vel2.y += impulse * mass1;
+
+				box1.SetVelocity(vel1);
+				box2.SetVelocity(vel2);
 			}
 		}
 	}
