@@ -1,0 +1,17 @@
+To-Do list
+
+-Fix projectile collision detection with boxes
+-Update Music and Sound effects
+-Fix player health UI display (change the text to black)
+-Add screen shake effect when hit
+-Add Chromatic aberration effect when hit
+-Add player input device screen (something like press any button to join, then pairs the first input to the first available player and so on)
+-Update UI (main menu, pause menu, in-game UI, buttons)
+-Fix player binding re-mapping
+-Round system (Start round, if player dies, load the scene again, track points)
+-Player point system (display points, add points for winning the round)
+
+Optional (if I have time)
+-Extra levels (diffrent premade platform, boxes and background layouts that get randomly chosen and loaded)
+-Power-ups per round (like the cards in rounds, can just be simple damage multipliers)
+-Fix player input binding UI (show mouse inputs and controller buttons) <- (this should be done but im not sure if I will have time to figure it out)
