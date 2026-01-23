@@ -378,6 +378,15 @@ void Aircraft::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 
 		//	m_played_explosion_sound = true;
 		//}
+
+		SetVelocity(0.f, 0.f);
+
+		// Hide health display when dead
+		if (m_health_display)
+		{
+			m_health_display->SetString("");
+		}
+
 		return;
 	}
 

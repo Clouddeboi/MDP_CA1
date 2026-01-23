@@ -100,6 +100,8 @@ void World::Update(sf::Time dt)
 	AdaptPlayerPosition();
 	HandleCollisions();
 	m_scenegraph.RemoveWrecks();
+
+
 }
 
 void World::Draw()
