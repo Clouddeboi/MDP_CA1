@@ -60,6 +60,7 @@ private:
 	void StartNewRound();
 	void RespawnPlayers();
 	int CountAlivePlayers() const;
+	void UpdateScoreDisplay();
 
 private:
 	struct SpawnPoint
@@ -102,5 +103,6 @@ private:
 	bool m_round_over;
 	sf::Time m_round_restart_timer;
 	const sf::Time m_round_restart_delay;
+	std::vector<TextNode*> m_score_displays;
 };
 

@@ -120,6 +120,7 @@ void World::Update(sf::Time dt)
 	m_scenegraph.RemoveWrecks();
 
 	CheckRoundEnd();
+	UpdateScoreDisplay();
 }
 
 void World::CheckRoundEnd()
@@ -204,6 +205,7 @@ void World::StartNewRound()
 	m_round_over = false;
 
 	RespawnPlayers();
+	UpdateScoreDisplay();
 
 	//Clear all projectiles
 	Command clearProjectiles;
@@ -484,6 +486,40 @@ void World::BuildScene()
 	// Add sound effect node
 	std::unique_ptr<SoundNode> soundNode(new SoundNode(m_sounds));
 	m_scenegraph.AttachChild(std::move(soundNode));
+
+	const float score_text_size = 2.f;
+	const float score_spacing = 60.f;
+
+	std::string* p1_score_text = new std::string("0");
+	std::unique_ptr<TextNode> p1_score_display(new TextNode(m_fonts, *p1_score_text));
+	p1_score_display->setPosition({ 20.f, 20.f });
+	p1_score_display->setScale({ score_text_size, score_text_size });
+	p1_score_display->SetColor(sf::Color::Red);
+	p1_score_display->SetOutlineColor(sf::Color::Black);
+	p1_score_display->SetOutlineThickness(3.f);
+	m_score_displays.push_back(p1_score_display.get());
+	m_scene_layers[static_cast<int>(SceneLayers::kBackground)]->AttachChild(std::move(p1_score_display));
+
+	std::string* p2_score_text = new std::string("0");
+	std::unique_ptr<TextNode> p2_score_display(new TextNode(m_fonts, *p2_score_text));
+	p2_score_display->setPosition({ 20.f, 20.f + score_spacing });
+	p2_score_display->setScale({ score_text_size, score_text_size });
+	p2_score_display->SetColor(sf::Color::Yellow);
+	p2_score_display->SetOutlineColor(sf::Color::Black);
+	p2_score_display->SetOutlineThickness(3.f);
+	m_score_displays.push_back(p2_score_display.get());
+	m_scene_layers[static_cast<int>(SceneLayers::kBackground)]->AttachChild(std::move(p2_score_display));
+}
+
+void World::UpdateScoreDisplay()
+{
+	for (size_t i = 0; i < m_score_displays.size() && i < m_player_scores.size(); ++i)
+	{
+		if (m_score_displays[i])
+		{
+			m_score_displays[i]->SetString(std::to_string(m_player_scores[i]));
+		}
+	}
 }
 
 void World::AdaptPlayerPosition()
