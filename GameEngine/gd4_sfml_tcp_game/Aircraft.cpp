@@ -381,7 +381,7 @@ void Aircraft::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 
 		SetVelocity(0.f, 0.f);
 
-		// Hide health display when dead
+		//Hide health display when dead
 		if (m_health_display)
 		{
 			m_health_display->SetString("");

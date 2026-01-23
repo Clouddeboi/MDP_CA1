@@ -20,6 +20,12 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	,m_spawn_position(m_world_bounds.size.x / 2.f, m_world_bounds.size.y - 300.f)
 	,m_scrollspeed(0.f)//Setting it to 0 since we don't want our players to move up automatically
 	,m_scene_texture({ m_target.getSize().x, m_target.getSize().y })
+	,m_player_scores(2, 0)//2 players, 0 points
+	,m_current_round(1)
+	,m_points_to_win(5)
+	,m_round_over(false)
+	,m_round_restart_timer(sf::Time::Zero)
+	,m_round_restart_delay(sf::seconds(3.0f))
 {
 	LoadTextures();
 	BuildScene();
@@ -30,10 +36,22 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	sf::Vector2f zoomedSize = cameraSize * 1.35f;
 	m_camera.setCenter({ zoomedSize.x / 2.f, zoomedSize.y / 2.f });
 
+	m_player_spawn_positions.push_back({ 200.f, 0.f });
+	m_player_spawn_positions.push_back({ 1200.f, 0.f });
+
 }
 
 void World::Update(sf::Time dt)
 {
+	if (m_round_over)
+	{
+		m_round_restart_timer += dt;
+		if (m_round_restart_timer >= m_round_restart_delay)
+		{
+			StartNewRound();
+		}
+		return;
+	}
 	//Scroll the world
 	//m_camera.move({ 0, m_scrollspeed * dt.asSeconds() });
 
@@ -101,7 +119,178 @@ void World::Update(sf::Time dt)
 	HandleCollisions();
 	m_scenegraph.RemoveWrecks();
 
+	CheckRoundEnd();
+}
 
+void World::CheckRoundEnd()
+{
+	if (m_round_over)
+		return;
+
+	int alive_count = CountAlivePlayers();
+	int last_alive_player = -1;
+
+	for (size_t i = 0; i < m_player_aircrafts.size(); ++i)
+	{
+		if (m_player_aircrafts[i] && !m_player_aircrafts[i]->IsDestroyed())
+		{
+			last_alive_player = static_cast<int>(i);
+		}
+	}
+
+	if (alive_count <= 1)
+	{
+		m_round_over = true;
+		m_round_restart_timer = sf::Time::Zero;
+
+		std::cout << "\n=== ROUND " << m_current_round << " OVER ===" << std::endl;
+		for (size_t i = 0; i < m_player_aircrafts.size(); ++i)
+		{
+			if (m_player_aircrafts[i])
+			{
+				bool is_alive = !m_player_aircrafts[i]->IsDestroyed();
+				int hp = m_player_aircrafts[i]->GetHitPoints();
+				std::cout << "Player " << (i + 1) << ": "
+					<< (is_alive ? "ALIVE" : "ELIMINATED")
+					<< " (HP: " << hp << ")" << std::endl;
+			}
+		}
+
+		if (alive_count == 1 && last_alive_player >= 0)
+		{
+			m_player_scores[last_alive_player]++;
+			std::cout << "\nPlayer " << (last_alive_player + 1) << " WINS" << std::endl;
+		}
+		else
+		{
+			//This probably won't happen in 2 player mode, but just in case
+			std::cout << "\nDRAW - Both players eliminated!" << std::endl;
+		}
+
+		std::cout << "\n--- SCORES ---" << std::endl;
+		for (size_t i = 0; i < m_player_scores.size(); ++i)
+		{
+			std::cout << "Player " << (i + 1) << ": " << m_player_scores[i] << " points" << std::endl;
+		}
+
+		if (IsGameOver())
+		{
+			int winner = GetWinner();
+			std::cout << "\n*** PLAYER " << (winner + 1) << " WINS THE GAME! ***" << std::endl;
+		}
+		else
+		{
+			std::cout << "\nNext round starts in " << m_round_restart_delay.asSeconds() << " seconds..." << std::endl;
+		}
+
+		std::cout << "====================\n" << std::endl;
+	}
+}
+
+void World::StartNewRound()
+{
+	if (IsGameOver())
+	{
+		std::cout << "\n=== GAME OVER ===" << std::endl;
+		std::cout << "Final Scores:" << std::endl;
+		for (size_t i = 0; i < m_player_scores.size(); ++i)
+		{
+			std::cout << "Player " << (i + 1) << ": " << m_player_scores[i] << " points" << std::endl;
+		}
+		std::cout << "=================\n" << std::endl;
+	}
+
+	m_current_round++;
+	m_round_over = false;
+
+	RespawnPlayers();
+
+	//Clear all projectiles
+	Command clearProjectiles;
+	clearProjectiles.category = static_cast<int>(ReceiverCategories::kProjectile);
+	clearProjectiles.action = DerivedAction<Entity>([](Entity& e, sf::Time)
+		{
+			e.Destroy();
+		});
+	m_command_queue.Push(clearProjectiles);
+
+	m_scenegraph.RemoveWrecks();
+}
+
+void World::RespawnPlayers()
+{
+	for (size_t i = 0; i < m_player_aircrafts.size(); ++i)
+	{
+		Aircraft* player = m_player_aircrafts[i];
+		if (!player)
+			continue;
+
+		int max_health = 100;
+		player->Repair(max_health);
+
+		if (i < m_player_spawn_positions.size())
+		{
+			player->setPosition(m_player_spawn_positions[i]);
+		}
+
+		player->SetVelocity(0.f, 0.f);
+		player->ClearForces();
+		player->ClearKnockback();
+
+		std::cout << "Player " << (i + 1) << " respawned!" << std::endl;
+	}
+}
+
+int World::CountAlivePlayers() const
+{
+	int count = 0;
+	for (const Aircraft* player : m_player_aircrafts)
+	{
+		if (player && !player->IsDestroyed())
+		{
+			count++;
+		}
+	}
+	return count;
+}
+
+int World::GetPlayerScore(int player_index) const
+{
+	if (player_index >= 0 && player_index < static_cast<int>(m_player_scores.size()))
+	{
+		return m_player_scores[player_index];
+	}
+	return 0;
+}
+
+int World::GetRoundNumber() const
+{
+	return m_current_round;
+}
+
+bool World::IsRoundOver() const
+{
+	return m_round_over;
+}
+
+bool World::IsGameOver() const
+{
+	for (int score : m_player_scores)
+	{
+		if (score >= m_points_to_win)
+			return true;
+	}
+	return false;
+}
+
+int World::GetWinner() const
+{
+	for (size_t i = 0; i < m_player_scores.size(); ++i)
+	{
+		if (m_player_scores[i] >= m_points_to_win)
+			return static_cast<int>(i);
+	}
+	return -1;
 }
 
 void World::Draw()
