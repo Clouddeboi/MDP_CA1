@@ -570,7 +570,7 @@ void World::HandleCollisions()
 			//Collision response
 			aircraft.Damage(projectile.GetDamage());
 
-			const float k_projectile_knockback_multiplier = 3.5f;
+			const float k_projectile_knockback_multiplier = 1.5f;
 			const sf::Time k_projectile_knockback_duration = sf::seconds(0.2f);
 			sf::Vector2f knockback_vel = projectile.GetVelocity() * k_projectile_knockback_multiplier;
 			aircraft.ApplyKnockback(knockback_vel, k_projectile_knockback_duration);
