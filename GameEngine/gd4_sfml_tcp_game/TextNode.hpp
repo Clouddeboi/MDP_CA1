@@ -7,6 +7,9 @@ class TextNode : public SceneNode
 public:
 	explicit TextNode(const FontHolder& fonts, std::string& text);
 	void SetString(const std::string& text);
+	void SetColor(const sf::Color& color);
+	void SetOutlineColor(const sf::Color& color);
+	void SetOutlineThickness(float thickness);
 
 private:
 	virtual void DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const override;

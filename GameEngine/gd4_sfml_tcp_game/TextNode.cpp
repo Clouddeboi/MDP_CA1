@@ -16,6 +16,21 @@ void TextNode::SetString(const std::string& text)
 	Utility::CentreOrigin(m_text);
 }
 
+void TextNode::SetColor(const sf::Color& color)
+{
+	m_text.setFillColor(color);
+}
+
+void TextNode::SetOutlineColor(const sf::Color& color)
+{
+	m_text.setOutlineColor(color);
+}
+
+void TextNode::SetOutlineThickness(float thickness)
+{
+	m_text.setOutlineThickness(thickness);
+}
+
 void TextNode::DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const
 {
 	target.draw(m_text, states);

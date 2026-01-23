@@ -175,18 +175,9 @@ void Aircraft::UpdateTexts()
 	m_health_display->setPosition({ 0.f, -50.f });
 	m_health_display->setRotation(-getRotation());
 
-	if (m_missile_display)
-	{
-		m_missile_display->setPosition({ 0.f, -70.f });
-		if (m_missile_ammo == 0)
-		{
-			m_missile_display->SetString("");
-		}
-		else
-		{
-			m_missile_display->SetString("M: " + std::to_string(m_missile_ammo));
-		}
-	}
+	m_health_display->SetColor(sf::Color::White);
+	m_health_display->SetOutlineColor(sf::Color::Black);
+	m_health_display->SetOutlineThickness(2.f);
 }
 
 void Aircraft::UpdateMovementPattern(sf::Time dt)
