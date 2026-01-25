@@ -22,10 +22,13 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	,m_scene_texture({ m_target.getSize().x, m_target.getSize().y })
 	,m_player_scores(2, 0)//2 players, 0 points
 	,m_current_round(1)
-	,m_points_to_win(5)
+	,m_points_to_win(1)
 	,m_round_over(false)
 	,m_round_restart_timer(sf::Time::Zero)
 	,m_round_restart_delay(sf::seconds(3.0f))
+	,m_game_over(false)
+	,m_game_over_timer(sf::Time::Zero)
+	,m_game_over_delay(sf::seconds(5.0f))
 {
 	LoadTextures();
 	BuildScene();
@@ -53,6 +56,13 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 
 void World::Update(sf::Time dt)
 {
+	if (m_game_over)
+	{
+		m_game_over_timer += dt;
+		UpdateRoundOverlay();
+		return;
+	}
+
 	if (m_round_over)
 	{
 		m_round_restart_timer += dt;
@@ -210,6 +220,10 @@ void World::StartNewRound()
 			std::cout << "Player " << (i + 1) << ": " << m_player_scores[i] << " points" << std::endl;
 		}
 		std::cout << "=================\n" << std::endl;
+
+		m_game_over = true;
+		m_game_over_timer = sf::Time::Zero;
+		return;
 	}
 
 	m_current_round++;
@@ -306,6 +320,11 @@ int World::GetWinner() const
 			return static_cast<int>(i);
 	}
 	return -1;
+}
+
+bool World::ShouldReturnToMenu() const
+{
+	return m_game_over && m_game_over_timer >= m_game_over_delay;
 }
 
 void World::UpdateRoundOverlay()

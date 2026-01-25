@@ -38,6 +38,14 @@ bool GameState::Update(sf::Time dt)
 {
 
 	m_world.Update(dt);
+
+	if (m_world.ShouldReturnToMenu())
+	{
+		RequestStackClear();
+		RequestStackPush(StateID::kMenu);
+		return false;
+	}
+
 	if (!m_world.HasAlivePlayer())
 	{
 		m_players[0].SetMissionStatus(MissionStatus::kMissionFailure);

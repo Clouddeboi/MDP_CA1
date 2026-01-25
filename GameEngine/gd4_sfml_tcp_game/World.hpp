@@ -35,6 +35,7 @@ public:
 	bool IsRoundOver() const;
 	bool IsGameOver() const;
 	int GetWinner() const;
+	bool ShouldReturnToMenu() const;
 
 private:
 	void LoadTextures();
@@ -104,6 +105,10 @@ private:
 	bool m_round_over;
 	sf::Time m_round_restart_timer;
 	const sf::Time m_round_restart_delay;
+
+	bool m_game_over;
+	sf::Time m_game_over_timer;
+	const sf::Time m_game_over_delay;
 
 	std::vector<TextNode*> m_score_displays;
 	std::optional<sf::Text> m_round_over_text;
