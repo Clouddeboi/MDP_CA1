@@ -39,6 +39,16 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	m_player_spawn_positions.push_back({ 200.f, 0.f });
 	m_player_spawn_positions.push_back({ 1200.f, 0.f });
 
+	m_round_over_text.emplace(m_fonts.Get(Font::kMain), "", 80);
+	m_round_over_text->setFillColor(sf::Color::White);
+	m_round_over_text->setOutlineColor(sf::Color::Black);
+	m_round_over_text->setOutlineThickness(3.f);
+
+	m_round_countdown_text.emplace(m_fonts.Get(Font::kMain), "", 40);
+	m_round_countdown_text->setFillColor(sf::Color::White);
+	m_round_countdown_text->setOutlineColor(sf::Color::Black);
+	m_round_countdown_text->setOutlineThickness(2.f);
+
 }
 
 void World::Update(sf::Time dt)
@@ -46,6 +56,7 @@ void World::Update(sf::Time dt)
 	if (m_round_over)
 	{
 		m_round_restart_timer += dt;
+		UpdateRoundOverlay();
 		if (m_round_restart_timer >= m_round_restart_delay)
 		{
 			StartNewRound();
@@ -295,6 +306,65 @@ int World::GetWinner() const
 	return -1;
 }
 
+void World::UpdateRoundOverlay()
+{
+	if (!m_round_over || !m_round_over_text.has_value() || !m_round_countdown_text.has_value())
+		return;
+
+	sf::Vector2f view_size = m_target.getDefaultView().getSize();
+
+	std::string message;
+	int last_round_winner = -1;
+	int alive_count = CountAlivePlayers();
+
+	if (alive_count == 1)
+	{
+		for (size_t i = 0; i < m_player_aircrafts.size(); ++i)
+		{
+			if (m_player_aircrafts[i] && !m_player_aircrafts[i]->IsDestroyed())
+			{
+				last_round_winner = static_cast<int>(i);
+				break;
+			}
+		}
+	}
+
+	if (last_round_winner >= 0)
+	{
+		message = "Player " + std::to_string(last_round_winner + 1) + " Wins!";
+		if (last_round_winner == 0)
+			m_round_over_text->setFillColor(sf::Color::Red);
+		else if (last_round_winner == 1)
+			m_round_over_text->setFillColor(sf::Color::Yellow);
+	}
+	else
+	{
+		message = "Draw!";
+		m_round_over_text->setFillColor(sf::Color::White);
+	}
+
+	m_round_over_text->setString(message);
+
+	sf::FloatRect text_bounds = m_round_over_text->getLocalBounds();
+	m_round_over_text->setOrigin({ text_bounds.position.x + text_bounds.size.x / 2.f, text_bounds.position.y + text_bounds.size.y / 2.f });
+	m_round_over_text->setPosition({ view_size.x / 2.f, view_size.y * 0.4f });
+	float remaining_time = (m_round_restart_delay - m_round_restart_timer).asSeconds();
+	int seconds = static_cast<int>(std::ceil(remaining_time));
+
+	if (IsGameOver())
+	{
+		m_round_countdown_text->setString("Game Over!");
+	}
+	else
+	{
+		m_round_countdown_text->setString("Next round in " + std::to_string(seconds) + "...");
+	}
+
+	sf::FloatRect countdown_bounds = m_round_countdown_text->getLocalBounds();
+	m_round_countdown_text->setOrigin({ countdown_bounds.position.x + countdown_bounds.size.x / 2.f, countdown_bounds.position.y + countdown_bounds.size.y / 2.f });
+	m_round_countdown_text->setPosition({ view_size.x / 2.f, view_size.y * 0.55f });
+}
+
 void World::Draw()
 {
 	//if (PostEffect::IsSupported())
@@ -309,6 +379,19 @@ void World::Draw()
 	{
 		m_target.setView(m_camera);
 		m_target.draw(m_scenegraph);
+	}
+
+	if (m_round_over && m_round_over_text.has_value() && m_round_countdown_text.has_value())
+	{
+		m_target.setView(m_target.getDefaultView());
+
+		sf::RectangleShape backgroundShape;
+		backgroundShape.setFillColor(sf::Color(0, 0, 0, 150));
+		backgroundShape.setSize(m_target.getDefaultView().getSize());
+
+		m_target.draw(backgroundShape);
+		m_target.draw(*m_round_over_text);
+		m_target.draw(*m_round_countdown_text);
 	}
 }
 
@@ -644,7 +727,6 @@ sf::FloatRect World::GetBattleFieldBounds() const
 	bounds.size.y += 100.f;
 
 	return bounds;
-
 }
 
 void World::DestroyEntitiesOutsideView()
