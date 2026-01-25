@@ -239,6 +239,8 @@ void World::RespawnPlayers()
 			continue;
 
 		int max_health = 100;
+
+		player->Destroy();
 		player->Repair(max_health);
 
 		if (i < m_player_spawn_positions.size())
