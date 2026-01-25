@@ -287,15 +287,24 @@ sf::FloatRect Aircraft::GetBoundingRect() const
 
 bool Aircraft::IsMarkedForRemoval() const
 {
-	return IsDestroyed() && (m_explosion.IsFinished() || !m_show_explosion);
+	if (m_player_id >= 0)
+	{
+		return false;
+	}
+
+	//return IsDestroyed() && (m_explosion.IsFinished() || !m_show_explosion);
 }
 
 void Aircraft::DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) const
 {
-	if (IsDestroyed() && m_show_explosion)
+	if (IsDestroyed() && m_player_id >= 0)
 	{
-		target.draw(m_explosion, states);
+		return;
 	}
+	//if (IsDestroyed() && m_show_explosion)
+	//{
+	//	target.draw(m_explosion, states);
+	//}
 	else
 	{
 		target.draw(m_sprite, states);
@@ -357,18 +366,27 @@ sf::Vector2f Aircraft::GetGunOffset() const
 
 void Aircraft::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 {
-	if (IsDestroyed())
+	if (IsDestroyed() && m_player_id >= 0)
 	{
-		CheckPickupDrop(commands);
-		m_explosion.Update(dt);
-		// Play explosion sound only once
-		if (!m_played_explosion_sound)
-		{
-			SoundEffect soundEffect = (Utility::RandomInt(2) == 0) ? SoundEffect::kExplosion1 : SoundEffect::kExplosion2;
-			PlayLocalSound(commands, soundEffect);
+		//CheckPickupDrop(commands);
+		//m_explosion.Update(dt);
+		//// Play explosion sound only once
+		//if (!m_played_explosion_sound)
+		//{
+		//	SoundEffect soundEffect = (Utility::RandomInt(2) == 0) ? SoundEffect::kExplosion1 : SoundEffect::kExplosion2;
+		//	PlayLocalSound(commands, soundEffect);
 
-			m_played_explosion_sound = true;
+		//	m_played_explosion_sound = true;
+		//}
+
+		SetVelocity(0.f, 0.f);
+
+		//Hide health display when dead
+		if (m_health_display)
+		{
+			m_health_display->SetString("");
 		}
+
 		return;
 	}
 

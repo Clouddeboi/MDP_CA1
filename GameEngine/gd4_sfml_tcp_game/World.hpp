@@ -30,6 +30,13 @@ public:
 
 	Aircraft* GetPlayerAircraft(int player_index);
 
+	int GetPlayerScore(int player_index) const;
+	int GetRoundNumber() const;
+	bool IsRoundOver() const;
+	bool IsGameOver() const;
+	int GetWinner() const;
+	bool ShouldReturnToMenu() const;
+
 private:
 	void LoadTextures();
 	void BuildScene();
@@ -49,6 +56,13 @@ private:
 	void UpdateSounds();
 	void AddPlatform(float x, float y, float width, float height, float unit);
 	void AddBox(float x, float y);
+
+	void CheckRoundEnd();
+	void StartNewRound();
+	void RespawnPlayers();
+	int CountAlivePlayers() const;
+	void UpdateScoreDisplay();
+	void UpdateRoundOverlay();
 
 private:
 	struct SpawnPoint
@@ -74,7 +88,6 @@ private:
 	sf::FloatRect m_world_bounds;
 	sf::Vector2f m_spawn_position;
 	float m_scrollspeed;
-	//Aircraft* m_player_aircraft;
 	std::vector<Aircraft*> m_player_aircrafts;
 
 
@@ -84,5 +97,21 @@ private:
 	std::vector<Aircraft*> m_active_enemies;
 
 	BloomEffect m_bloom_effect;
+
+	std::vector<int> m_player_scores;
+	std::vector<sf::Vector2f> m_player_spawn_positions;
+	int m_current_round;
+	int m_points_to_win;
+	bool m_round_over;
+	sf::Time m_round_restart_timer;
+	const sf::Time m_round_restart_delay;
+
+	bool m_game_over;
+	sf::Time m_game_over_timer;
+	const sf::Time m_game_over_delay;
+
+	std::vector<TextNode*> m_score_displays;
+	std::optional<sf::Text> m_round_over_text;
+	std::optional<sf::Text> m_round_countdown_text;
 };
 

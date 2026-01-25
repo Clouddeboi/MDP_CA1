@@ -8,8 +8,8 @@ To-Do list
 -Add player input device screen (something like press any button to join, then pairs the first input to the first available player and so on)
 -Update UI (main menu, pause menu, in-game UI, buttons)
 -Fix player binding re-mapping
--Round system (Start round, if player dies, load the scene again, track points)
--Player point system (display points, add points for winning the round)
+-Round system (Start round, if player dies, load the scene again, track points) - DONE
+-Player point system (display points, add points for winning the round) - DONE
 
 Optional (if I have time)
 -Extra levels (diffrent premade platform, boxes and background layouts that get randomly chosen and loaded)
