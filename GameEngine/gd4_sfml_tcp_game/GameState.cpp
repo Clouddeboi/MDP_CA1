@@ -63,7 +63,6 @@ GameState::GameState(StateStack& stack, Context context) : State(stack, context)
 	}
 }
 
-
 void GameState::Draw()
 {
 	m_world.Draw();
