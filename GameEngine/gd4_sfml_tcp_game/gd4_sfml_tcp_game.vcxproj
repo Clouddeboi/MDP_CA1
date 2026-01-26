@@ -137,6 +137,7 @@
     <ClCompile Include="Aircraft.cpp" />
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="BindingState.cpp" />
     <ClCompile Include="BloomEffect.cpp" />
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="Command.cpp" />
@@ -181,6 +182,7 @@
     <ClInclude Include="AircraftType.hpp" />
     <ClInclude Include="Animation.hpp" />
     <ClInclude Include="Application.hpp" />
+    <ClInclude Include="BindingState.hpp" />
     <ClInclude Include="BloomEffect.hpp" />
     <ClInclude Include="Box.hpp" />
     <ClInclude Include="Button.hpp" />

@@ -84,47 +84,6 @@ bool GameState::Update(sf::Time dt)
 
 bool GameState::HandleEvent(const sf::Event& event)
 {
-	//Testing the input device detection
-	static PlayerBindingManager bindingManager;
-	static InputDeviceDetector detector;
-
-	if (detector.IsInputEvent(event))
-	{
-		auto device = detector.DetectDeviceFromEvent(event);
-		if (device.has_value())
-		{
-			//Try to bind to first unbound player
-			for (int i = 0; i < PlayerBindingManager::kMaxPlayers; ++i)
-			{
-				if (!bindingManager.IsPlayerBound(i))
-				{
-					if (bindingManager.TryBindPlayer(i, device.value()))
-					{
-						std::cout << "[TEST] Binding complete: " << bindingManager.GetBoundPlayerCount()
-							<< "/" << PlayerBindingManager::kMaxPlayers << " players bound\n";
-
-						if (bindingManager.IsBindingComplete())
-						{
-							std::cout << "[TEST] ALL PLAYERS BOUND! Ready to start game.\n";
-							//List all bindings
-							for (int j = 0; j < PlayerBindingManager::kMaxPlayers; ++j)
-							{
-								auto playerDevice = bindingManager.GetPlayerDevice(j);
-								if (playerDevice.has_value())
-								{
-									std::cout << "[TEST] Player " << (j + 1) << " -> "
-										<< InputDeviceDetector::GetDeviceDescription(playerDevice.value()) << "\n";
-								}
-							}
-						}
-					}
-					//Only bind to first unbound player
-					break;
-				}
-			}
-		}
-	}
-
 	if (const auto* joystickConnected = event.getIf<sf::Event::JoystickConnected>())
 	{
 		auto id = sf::Joystick::getIdentification(joystickConnected->joystickId);
