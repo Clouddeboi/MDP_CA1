@@ -5,5 +5,6 @@ enum class ShaderTypes
 	kDownSamplePass,
 	kGaussianBlurPass,
 	kAddPass,
-	kChromaticAberration
+	kChromaticAberration,
+	kScreenShake
 };

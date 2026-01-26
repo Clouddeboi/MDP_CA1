@@ -150,6 +150,9 @@
     <ClCompile Include="ChromaticAberrationEffect.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ScreenShakeEffect.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.hpp">
@@ -344,6 +347,9 @@
     <ClInclude Include="ChromaticAberrationEffect.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ScreenShakeEffect.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="ResourceHolder.inl">
@@ -364,7 +370,10 @@
     <None Include="Media\Shaders\Fullpass.vert">
       <Filter>Shaders\Vertex</Filter>
     </None>
-    <None Include="ChromaticAberration.frag">
+    <None Include="Media\Shaders\ChromaticAberration.frag">
+      <Filter>Shaders\Fragment</Filter>
+    </None>
+    <None Include="Media\Shaders\ScreenShake.frag">
       <Filter>Shaders\Fragment</Filter>
     </None>
   </ItemGroup>

@@ -31,6 +31,10 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	,m_game_over_delay(sf::seconds(5.0f))
 	,m_damage_effect_intensity(5.f)
 	,m_damage_effect_timer(sf::Time::Zero)
+	,m_screen_shake_intensity(0.f)
+	,m_screen_shake_timer(sf::Time::Zero)
+	,m_screen_shake_duration(sf::Time::Zero)
+	,m_screen_shake_time_accumulator(sf::Time::Zero)
 {
 	LoadTextures();
 	BuildScene();
@@ -77,6 +81,7 @@ void World::Update(sf::Time dt)
 	}
 
 	UpdateDamageEffect(dt);
+	UpdateScreenShake(dt);
 
 	{
 		Command gravity;
@@ -397,11 +402,38 @@ void World::Draw()
 		m_scene_texture.draw(m_scenegraph);
 		m_scene_texture.display();
 
-		//Apply chromatic aberration if active
-		if (m_damage_effect_intensity > 0.f)
+		bool has_chromatic = m_damage_effect_intensity > 0.f;
+		bool has_shake = m_screen_shake_intensity > 0.f;
+
+		if (has_chromatic || has_shake)
 		{
-			m_chromatic_effect.SetIntensity(m_damage_effect_intensity);
-			m_chromatic_effect.Apply(m_scene_texture, m_target);
+			sf::RenderTexture temp_texture;
+			if (!temp_texture.resize(m_target.getSize()))
+			{
+				//Fallback if resize fails
+				m_target.setView(m_camera);
+				m_target.draw(m_scenegraph);
+				return;
+			}
+			temp_texture.clear();
+
+			if (has_chromatic && !has_shake)
+			{
+				m_chromatic_effect.SetIntensity(m_damage_effect_intensity);
+				m_chromatic_effect.Apply(m_scene_texture, m_target);
+			}
+			else if (has_shake && !has_chromatic)
+			{
+				m_screen_shake_effect.Apply(m_scene_texture, m_target);
+			}
+			else
+			{
+				m_chromatic_effect.SetIntensity(m_damage_effect_intensity);
+				m_chromatic_effect.Apply(m_scene_texture, temp_texture);
+				temp_texture.display();
+
+				m_screen_shake_effect.Apply(temp_texture, m_target);
+			}
 		}
 		else
 		{
@@ -448,6 +480,34 @@ void World::UpdateDamageEffect(sf::Time dt)
 		if (progress >= 1.f)
 		{
 			m_damage_effect_intensity = 0.f;
+		}
+	}
+}
+
+void World::TriggerScreenShake(float intensity, float duration)
+{
+	m_screen_shake_intensity = intensity;
+	m_screen_shake_duration = sf::seconds(duration);
+	m_screen_shake_timer = sf::Time::Zero;
+}
+
+void World::UpdateScreenShake(sf::Time dt)
+{
+	if (m_screen_shake_intensity > 0.f)
+	{
+		m_screen_shake_timer += dt;
+		m_screen_shake_time_accumulator += dt;
+
+		// Fade out intensity over duration
+		float progress = m_screen_shake_timer.asSeconds() / m_screen_shake_duration.asSeconds();
+		float current_intensity = m_screen_shake_intensity * (1.f - progress);
+
+		m_screen_shake_effect.SetIntensity(current_intensity);
+		m_screen_shake_effect.SetTime(m_screen_shake_time_accumulator.asSeconds());
+
+		if (progress >= 1.f)
+		{
+			m_screen_shake_intensity = 0.f;
 		}
 	}
 }
@@ -910,6 +970,7 @@ void World::HandleCollisions()
 			auto& projectile = static_cast<Projectile&>(*pair.second);
 
 			TriggerDamageEffect();
+			TriggerScreenShake(0.001f, 0.03f);
 
 			//Collision response
 			aircraft.Damage(projectile.GetDamage());
@@ -938,6 +999,7 @@ void World::HandleCollisions()
 			auto& projectile = static_cast<Projectile&>(*pair.second);
 
 			TriggerDamageEffect();
+			TriggerScreenShake(0.001f, 0.03f);
 
 			//Collision response
 			aircraft.Damage(projectile.GetDamage());
