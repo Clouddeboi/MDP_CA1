@@ -140,6 +140,7 @@
     <ClCompile Include="BindingState.cpp" />
     <ClCompile Include="BloomEffect.cpp" />
     <ClCompile Include="Button.cpp" />
+    <ClCompile Include="ChromaticAberrationEffect.cpp" />
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="CommandQueue.cpp" />
     <ClCompile Include="Component.cpp" />
@@ -187,6 +188,7 @@
     <ClInclude Include="Box.hpp" />
     <ClInclude Include="Button.hpp" />
     <ClInclude Include="ButtonType.hpp" />
+    <ClInclude Include="ChromaticAberrationEffect.hpp" />
     <ClInclude Include="Command.hpp" />
     <ClInclude Include="CommandQueue.hpp" />
     <ClInclude Include="Component.hpp" />
@@ -242,6 +244,12 @@
     <ClInclude Include="World.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ChromaticAberration.frag" />
+    <None Include="Media\Shaders\Add.frag" />
+    <None Include="Media\Shaders\Brightness.frag" />
+    <None Include="Media\Shaders\DownSample.frag" />
+    <None Include="Media\Shaders\Fullpass.vert" />
+    <None Include="Media\Shaders\GuassianBlur.frag" />
     <None Include="ResourceHolder.inl" />
   </ItemGroup>
   <ItemGroup>

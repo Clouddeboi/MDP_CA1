@@ -29,6 +29,8 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	,m_game_over(false)
 	,m_game_over_timer(sf::Time::Zero)
 	,m_game_over_delay(sf::seconds(5.0f))
+	,m_damage_effect_intensity(5.f)
+	,m_damage_effect_timer(sf::Time::Zero)
 {
 	LoadTextures();
 	BuildScene();
@@ -73,8 +75,8 @@ void World::Update(sf::Time dt)
 		}
 		return;
 	}
-	//Scroll the world
-	//m_camera.move({ 0, m_scrollspeed * dt.asSeconds() });
+
+	UpdateDamageEffect(dt);
 
 	{
 		Command gravity;
@@ -388,15 +390,26 @@ void World::UpdateRoundOverlay()
 
 void World::Draw()
 {
-	//if (PostEffect::IsSupported())
-	//{
-	//	m_scene_texture.clear();
-	//	m_scene_texture.setView(m_camera);
-	//	m_scene_texture.draw(m_scenegraph);
-	//	m_scene_texture.display();
-	//	m_bloom_effect.Apply(m_scene_texture, m_target);
-	//}
-	//else
+	if (PostEffect::IsSupported())
+	{
+		m_scene_texture.clear();
+		m_scene_texture.setView(m_camera);
+		m_scene_texture.draw(m_scenegraph);
+		m_scene_texture.display();
+
+		//Apply chromatic aberration if active
+		if (m_damage_effect_intensity > 0.f)
+		{
+			m_chromatic_effect.SetIntensity(m_damage_effect_intensity);
+			m_chromatic_effect.Apply(m_scene_texture, m_target);
+		}
+		else
+		{
+			sf::Sprite sprite(m_scene_texture.getTexture());
+			m_target.draw(sprite);
+		}
+	}
+	else
 	{
 		m_target.setView(m_camera);
 		m_target.draw(m_scenegraph);
@@ -413,6 +426,29 @@ void World::Draw()
 		m_target.draw(backgroundShape);
 		m_target.draw(*m_round_over_text);
 		m_target.draw(*m_round_countdown_text);
+	}
+}
+
+void World::TriggerDamageEffect()
+{
+	m_damage_effect_intensity = m_max_damage_intensity;
+	m_damage_effect_timer = sf::Time::Zero;
+}
+
+void World::UpdateDamageEffect(sf::Time dt)
+{
+	if (m_damage_effect_intensity > 0.f)
+	{
+		m_damage_effect_timer += dt;
+
+		//Fade out effect over time
+		float progress = m_damage_effect_timer.asSeconds() / m_damage_effect_duration.asSeconds();
+		m_damage_effect_intensity = m_max_damage_intensity * (1.f - progress);
+
+		if (progress >= 1.f)
+		{
+			m_damage_effect_intensity = 0.f;
+		}
 	}
 }
 
@@ -872,6 +908,9 @@ void World::HandleCollisions()
 		{
 			auto& aircraft = static_cast<Aircraft&>(*pair.first);
 			auto& projectile = static_cast<Projectile&>(*pair.second);
+
+			TriggerDamageEffect();
+
 			//Collision response
 			aircraft.Damage(projectile.GetDamage());
 			projectile.Destroy();
@@ -897,6 +936,9 @@ void World::HandleCollisions()
 			//Player can damage themselves with their own projectiles
 			auto& aircraft = static_cast<Aircraft&>(*pair.first);
 			auto& projectile = static_cast<Projectile&>(*pair.second);
+
+			TriggerDamageEffect();
+
 			//Collision response
 			aircraft.Damage(projectile.GetDamage());
 
