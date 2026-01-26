@@ -1,6 +1,7 @@
 #include "GameState.hpp"
 #include "Player.hpp"
 #include "MissionStatus.hpp"
+#include "InputDevice.hpp"
 #include <iostream> 
 
 GameState::GameState(StateStack& stack, Context context) : State(stack, context), m_world(*context.window, *context.fonts, *context.sounds), m_players{{ Player(0), Player(1) }}
@@ -82,6 +83,19 @@ bool GameState::Update(sf::Time dt)
 
 bool GameState::HandleEvent(const sf::Event& event)
 {
+	//Testing the input device detection
+	static InputDeviceDetector detector;
+
+	if (detector.IsInputEvent(event))
+	{
+		auto device = detector.DetectDeviceFromEvent(event);
+		if (device.has_value())
+		{
+			std::cout << "[TEST] Device detected: "
+				<< InputDeviceDetector::GetDeviceDescription(device.value()) << "\n";
+		}
+	}
+
 	if (const auto* joystickConnected = event.getIf<sf::Event::JoystickConnected>())
 	{
 		auto id = sf::Joystick::getIdentification(joystickConnected->joystickId);
