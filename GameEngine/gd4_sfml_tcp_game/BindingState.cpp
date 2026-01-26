@@ -18,11 +18,15 @@ BindingState::BindingState(StateStack& stack, Context context)
 
 	m_title_text.emplace(context.fonts->Get(Font::kMain), "PLAYER BINDING", 60);
 	m_title_text->setFillColor(sf::Color::White);
+	m_title_text->setOutlineColor(sf::Color::Black);
+	m_title_text->setOutlineThickness(2.f);
 	Utility::CentreOrigin(*m_title_text);
 	m_title_text->setPosition({ windowSize.x / 2.f, 100.f });
 
 	m_instructions_text.emplace(context.fonts->Get(Font::kMain), "Press any button on your input device to bind", 24);
 	m_instructions_text->setFillColor(sf::Color::White);
+	m_instructions_text->setOutlineColor(sf::Color::Black);
+	m_instructions_text->setOutlineThickness(2.f);
 	Utility::CentreOrigin(*m_instructions_text);
 	m_instructions_text->setPosition({ windowSize.x / 2.f, 180.f });
 
@@ -35,6 +39,8 @@ BindingState::BindingState(StateStack& stack, Context context)
 
 	m_ready_text.emplace(context.fonts->Get(Font::kMain), "Press ENTER to start game\nPress ESC to unbind all", 28);
 	m_ready_text->setFillColor(sf::Color::Green);
+	m_ready_text->setOutlineColor(sf::Color::Black);
+	m_ready_text->setOutlineThickness(2.f);
 	Utility::CentreOrigin(*m_ready_text);
 	m_ready_text->setPosition({ windowSize.x / 2.f, 500.f });
 
@@ -197,15 +203,21 @@ void BindingState::UpdatePlayerStatusText()
 				statusText += InputDeviceDetector::GetDeviceDescription(device.value());
 				statusText += " [BOUND]";
 				m_player_status_text[i]->setFillColor(sf::Color::Green);
+				m_player_status_text[i]->setOutlineColor(sf::Color::Black);
+				m_player_status_text[i]->setOutlineThickness(2.f);
 			}
 		}
 		else
 		{
 			statusText += "Waiting for input...";
 			m_player_status_text[i]->setFillColor(sf::Color::White);
+			m_player_status_text[i]->setOutlineColor(sf::Color::Black);
+			m_player_status_text[i]->setOutlineThickness(2.f);
 		}
 
 		m_player_status_text[i]->setString(statusText);
+		m_player_status_text[i]->setOutlineColor(sf::Color::Black);
+		m_player_status_text[i]->setOutlineThickness(2.f);
 	}
 
 	UpdateInstructions();

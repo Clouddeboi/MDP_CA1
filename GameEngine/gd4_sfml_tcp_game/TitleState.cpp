@@ -13,6 +13,9 @@ TitleState::TitleState(StateStack& stack, Context context)
     //m_background_sprite.setTexture(context.textures->Get(TextureID::kTitleScreen));
     //m_text.setFont(context.fonts->Get(Font::kMain));
     m_text.setString("Press any key to continue");
+    m_text.setFillColor(sf::Color::White);
+    m_text.setOutlineColor(sf::Color::Black);
+    m_text.setOutlineThickness(2.f);
     Utility::CentreOrigin(m_text);
     m_text.setPosition(context.window->getView().getSize() / 2.f);
 }
