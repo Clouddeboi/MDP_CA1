@@ -84,6 +84,7 @@ bool BindingState::HandleEvent(const sf::Event& event)
 			if (keyPressed->code == sf::Keyboard::Key::Enter)
 			{
 				std::cout << "[BindingState] Starting game with bindings:\n";
+				GetContext().sounds->Play(SoundEffect::kStartGame);
 
 				//Save bindings to global config
 				auto& config = PlayerBindingConfig::GetInstance();
@@ -112,6 +113,7 @@ bool BindingState::HandleEvent(const sf::Event& event)
 			if (m_binding_manager.GetBoundPlayerCount() > 0)
 			{
 				//Unbind all players
+				GetContext().sounds->Play(SoundEffect::kError);
 				m_binding_manager.UnbindAll();
 				m_all_players_bound = false;
 				UpdatePlayerStatusText();
@@ -120,6 +122,7 @@ bool BindingState::HandleEvent(const sf::Event& event)
 			else
 			{
 				//Go back to menu
+				GetContext().sounds->Play(SoundEffect::kButtonClick);
 				RequestStackPop();
 				RequestStackPush(StateID::kMenu);
 			}
@@ -139,6 +142,7 @@ bool BindingState::HandleEvent(const sf::Event& event)
 				{
 					if (m_binding_manager.TryBindPlayer(i, device.value()))
 					{
+						GetContext().sounds->Play(SoundEffect::kPairedPlayer);
 						UpdatePlayerStatusText();
 						CheckBindingComplete();
 					}
@@ -212,6 +216,7 @@ void BindingState::CheckBindingComplete()
 	if (m_binding_manager.IsBindingComplete())
 	{
 		m_all_players_bound = true;
+		GetContext().sounds->Play(SoundEffect::kCollectPickup);
 		std::cout << "[BindingState] All players bound! Ready to start game.\n";
 	}
 }

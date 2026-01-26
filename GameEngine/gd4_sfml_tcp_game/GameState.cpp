@@ -4,9 +4,10 @@
 #include "InputDevice.hpp"
 #include "PlayerBindingManager.hpp"
 #include "PlayerBindingConfig.hpp"
+#include "SoundPlayer.hpp"
 #include <iostream> 
 
-GameState::GameState(StateStack& stack, Context context) : State(stack, context), m_world(*context.window, *context.fonts, *context.sounds), m_players{{ Player(0), Player(1) }}
+GameState::GameState(StateStack& stack, Context context) : State(stack, context), m_world(*context.window, *context.fonts, *context.sounds), m_players{ { Player(0), Player(1) } }, m_sounds(*context.sounds)
 {
 	//Play the music
 	context.music->Play(MusicThemes::kMissionTheme);
