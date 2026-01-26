@@ -1,6 +1,7 @@
 #include "BindingState.hpp"
 #include "ResourceHolder.hpp"
 #include "Utility.hpp"
+#include "PlayerBindingConfig.hpp"
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <iostream>
 
@@ -83,11 +84,15 @@ bool BindingState::HandleEvent(const sf::Event& event)
 			if (keyPressed->code == sf::Keyboard::Key::Enter)
 			{
 				std::cout << "[BindingState] Starting game with bindings:\n";
+
+				//Save bindings to global config
+				auto& config = PlayerBindingConfig::GetInstance();
 				for (int i = 0; i < kMaxPlayers; ++i)
 				{
 					auto device = m_binding_manager.GetPlayerDevice(i);
 					if (device.has_value())
 					{
+						config.SetPlayerDevice(i, device.value());
 						std::cout << "  Player " << (i + 1) << " -> "
 							<< InputDeviceDetector::GetDeviceDescription(device.value()) << "\n";
 					}

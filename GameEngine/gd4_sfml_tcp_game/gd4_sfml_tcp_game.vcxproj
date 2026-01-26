@@ -214,6 +214,7 @@
     <ClInclude Include="PickupType.hpp" />
     <ClInclude Include="Platform.hpp" />
     <ClInclude Include="Player.hpp" />
+    <ClInclude Include="PlayerBindingConfig.hpp" />
     <ClInclude Include="PlayerBindingManager.hpp" />
     <ClInclude Include="PostEffect.hpp" />
     <ClInclude Include="Projectile.hpp" />
