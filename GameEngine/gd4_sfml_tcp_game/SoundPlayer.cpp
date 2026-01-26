@@ -1,9 +1,6 @@
 #include "SoundPlayer.hpp"
-
 #include "SoundEffect.hpp"
-
 #include <SFML/Audio/Listener.hpp>
-
 #include <cmath>
 
 
@@ -26,6 +23,11 @@ SoundPlayer::SoundPlayer()
 	m_sound_buffers.Load(SoundEffect::kLaunchMissile, "Media/Sound/LaunchMissile.wav");
 	m_sound_buffers.Load(SoundEffect::kCollectPickup, "Media/Sound/CollectPickup.wav");
 	m_sound_buffers.Load(SoundEffect::kButton, "Media/Sound/Button.wav");
+
+	m_sound_buffers.Load(SoundEffect::kButtonClick, "Media/Sound/ButtonClick.wav");
+	m_sound_buffers.Load(SoundEffect::kError, "Media/Sound/Error.wav");
+	m_sound_buffers.Load(SoundEffect::kStartGame, "Media/Sound/StartGame.wav");
+	m_sound_buffers.Load(SoundEffect::kPairedPlayer, "Media/Sound/PairedPlayer.wav");
 
 	// Listener points towards the screen (default in SFML)
 	sf::Listener::setDirection({ 0.f, 0.f, -1.f });

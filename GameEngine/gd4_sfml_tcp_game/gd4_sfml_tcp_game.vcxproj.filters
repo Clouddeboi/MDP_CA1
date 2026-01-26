@@ -129,6 +129,15 @@
     <ClCompile Include="Platform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="InputDevice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerBindingManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BindingState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.hpp">
@@ -308,6 +317,18 @@
     <ClInclude Include="Box.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="InputDevice.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerBindingManager.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BindingState.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerBindingConfig.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="ResourceHolder.inl">
@@ -316,5 +337,6 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="ToDo.txt" />
+    <Text Include="References.txt" />
   </ItemGroup>
 </Project>

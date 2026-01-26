@@ -17,7 +17,7 @@ MenuState::MenuState(StateStack& stack, Context context)
     play_button->SetCallback([this]()
     {
         RequestStackPop();
-        RequestStackPush(StateID::kGame);
+        RequestStackPush(StateID::kBinding);
     });
 
     auto settings_button = std::make_shared<gui::Button>(context);

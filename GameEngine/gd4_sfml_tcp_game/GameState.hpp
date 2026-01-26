@@ -2,6 +2,7 @@
 #include "State.hpp"
 #include "World.hpp"
 #include "Player.hpp"
+#include "SoundPlayer.hpp"
 #include <array>
 
 class GameState : public State
@@ -15,5 +16,6 @@ public:
 private:
 	World m_world;
 	std::array<Player, 2> m_players;
+	SoundPlayer& m_sounds;
 };
 

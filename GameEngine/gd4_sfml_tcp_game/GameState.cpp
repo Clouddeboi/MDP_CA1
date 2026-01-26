@@ -1,33 +1,67 @@
 #include "GameState.hpp"
 #include "Player.hpp"
 #include "MissionStatus.hpp"
+#include "InputDevice.hpp"
+#include "PlayerBindingManager.hpp"
+#include "PlayerBindingConfig.hpp"
+#include "SoundPlayer.hpp"
 #include <iostream> 
 
-GameState::GameState(StateStack& stack, Context context) : State(stack, context), m_world(*context.window, *context.fonts, *context.sounds), m_players{{ Player(0), Player(1) }}
+GameState::GameState(StateStack& stack, Context context) : State(stack, context), m_world(*context.window, *context.fonts, *context.sounds), m_players{ { Player(0), Player(1) } }, m_sounds(*context.sounds)
 {
 	//Play the music
 	context.music->Play(MusicThemes::kMissionTheme);
 
-	int assigned_controllers = 0;
-	for (unsigned int i = 0; i < sf::Joystick::Count && assigned_controllers < 2; ++i)
-	{
-		if (sf::Joystick::isConnected(i))
-		{
-			auto id = sf::Joystick::getIdentification(i);
-			std::cout << "Controller connected at startup: id=" << i
-				<< " name=\"" << id.name.toAnsiString() << "\"\n";
+	auto& config = PlayerBindingConfig::GetInstance();
 
-			//Assign to next available player
-			if (assigned_controllers < static_cast<int>(m_players.size()))
+	if (config.HasBindings())
+	{
+		std::cout << "[GAME] Using player bindings from binding screen:\n";
+
+		//Apply bindings from the binding screen
+		for (int i = 0; i < 2; ++i)
+		{
+			auto device = config.GetPlayerDevice(i);
+			if (device.has_value())
 			{
-				m_players[assigned_controllers].SetJoystickId(static_cast<int>(i));
-				std::cout << "[GAME] Assigned joystick " << i << " to player " << assigned_controllers << "\n";
-				assigned_controllers++;
+				std::cout << "[GAME] Player " << i << " -> "
+					<< InputDeviceDetector::GetDeviceDescription(device.value()) << "\n";
+
+				if (device->type == InputDeviceType::kController)
+				{
+					m_players[i].SetJoystickId(device->deviceIndex);
+				}
+				else
+				{
+					m_players[i].SetJoystickId(-1);
+				}
+			}
+		}
+	}
+	else
+	{
+		//Fallback: Old auto assignment logic
+		std::cout << "[GAME] No bindings found, using auto-assignment\n";
+		int assigned_controllers = 0;
+		for (unsigned int i = 0; i < sf::Joystick::Count && assigned_controllers < 2; ++i)
+		{
+			if (sf::Joystick::isConnected(i))
+			{
+				auto id = sf::Joystick::getIdentification(i);
+				std::cout << "Controller connected at startup: id=" << i
+					<< " name=\"" << id.name.toAnsiString() << "\"\n";
+
+				//Assign to next available player
+				if (assigned_controllers < static_cast<int>(m_players.size()))
+				{
+					m_players[assigned_controllers].SetJoystickId(static_cast<int>(i));
+					std::cout << "[GAME] Assigned joystick " << i << " to player " << assigned_controllers << "\n";
+					assigned_controllers++;
+				}
 			}
 		}
 	}
 }
-
 
 void GameState::Draw()
 {

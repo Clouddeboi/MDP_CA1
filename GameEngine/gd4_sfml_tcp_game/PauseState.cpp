@@ -17,11 +17,17 @@ PauseState::PauseState(StateStack& stack, Context context)
     m_paused_text.setCharacterSize(70);
     Utility::CentreOrigin(m_paused_text);
     m_paused_text.setPosition({ 0.5f * view_size.x, 0.4f * view_size.y });
+	m_paused_text.setFillColor(sf::Color::White);
+    m_paused_text.setOutlineColor(sf::Color::Black);
+    m_paused_text.setOutlineThickness(2.f);
 
     //m_instruction_text.setFont(font);
     m_instruction_text.setString("Press backspace to return to main menu, esc to game");
     Utility::CentreOrigin(m_instruction_text);
     m_instruction_text.setPosition({ 0.5f * view_size.x, 0.6f * view_size.y });
+    m_paused_text.setFillColor(sf::Color::White);
+    m_paused_text.setOutlineColor(sf::Color::Black);
+    m_paused_text.setOutlineThickness(2.f);
 
     //Pause the music
     GetContext().music->SetPaused(true);
