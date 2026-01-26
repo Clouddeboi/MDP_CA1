@@ -140,6 +140,7 @@
     <ClCompile Include="BindingState.cpp" />
     <ClCompile Include="BloomEffect.cpp" />
     <ClCompile Include="Button.cpp" />
+    <ClCompile Include="ChromaticAberrationEffect.cpp" />
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="CommandQueue.cpp" />
     <ClCompile Include="Component.cpp" />
@@ -164,6 +165,7 @@
     <ClCompile Include="PostEffect.cpp" />
     <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="SceneNode.cpp" />
+    <ClCompile Include="ScreenShakeEffect.cpp" />
     <ClCompile Include="SettingsState.cpp" />
     <ClCompile Include="SoundNode.cpp" />
     <ClCompile Include="SoundPlayer.cpp" />
@@ -187,6 +189,7 @@
     <ClInclude Include="Box.hpp" />
     <ClInclude Include="Button.hpp" />
     <ClInclude Include="ButtonType.hpp" />
+    <ClInclude Include="ChromaticAberrationEffect.hpp" />
     <ClInclude Include="Command.hpp" />
     <ClInclude Include="CommandQueue.hpp" />
     <ClInclude Include="Component.hpp" />
@@ -224,6 +227,7 @@
     <ClInclude Include="ResourceIdentifiers.hpp" />
     <ClInclude Include="SceneLayers.hpp" />
     <ClInclude Include="SceneNode.hpp" />
+    <ClInclude Include="ScreenShakeEffect.hpp" />
     <ClInclude Include="SettingsState.hpp" />
     <ClInclude Include="ShaderTypes.hpp" />
     <ClInclude Include="SoundEffect.hpp" />
@@ -242,6 +246,13 @@
     <ClInclude Include="World.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Media\Shaders\Add.frag" />
+    <None Include="Media\Shaders\Brightness.frag" />
+    <None Include="Media\Shaders\ChromaticAberration.frag" />
+    <None Include="Media\Shaders\DownSample.frag" />
+    <None Include="Media\Shaders\Fullpass.vert" />
+    <None Include="Media\Shaders\GuassianBlur.frag" />
+    <None Include="Media\Shaders\ScreenShake.frag" />
     <None Include="ResourceHolder.inl" />
   </ItemGroup>
   <ItemGroup>

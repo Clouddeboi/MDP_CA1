@@ -13,6 +13,15 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{410ee752-a7e7-4e64-8a7b-d31c4604609e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Fragment">
+      <UniqueIdentifier>{957c688e-d97b-41ab-9404-161c39c0233e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Vertex">
+      <UniqueIdentifier>{a0ed2b1c-c886-42a8-a9bc-f8fbb118eefc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -136,6 +145,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BindingState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ChromaticAberrationEffect.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ScreenShakeEffect.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -329,10 +344,37 @@
     <ClInclude Include="PlayerBindingConfig.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ChromaticAberrationEffect.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ScreenShakeEffect.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="ResourceHolder.inl">
       <Filter>Source Files</Filter>
+    </None>
+    <None Include="Media\Shaders\Add.frag">
+      <Filter>Shaders\Fragment</Filter>
+    </None>
+    <None Include="Media\Shaders\Brightness.frag">
+      <Filter>Shaders\Fragment</Filter>
+    </None>
+    <None Include="Media\Shaders\DownSample.frag">
+      <Filter>Shaders\Fragment</Filter>
+    </None>
+    <None Include="Media\Shaders\GuassianBlur.frag">
+      <Filter>Shaders\Fragment</Filter>
+    </None>
+    <None Include="Media\Shaders\Fullpass.vert">
+      <Filter>Shaders\Vertex</Filter>
+    </None>
+    <None Include="Media\Shaders\ChromaticAberration.frag">
+      <Filter>Shaders\Fragment</Filter>
+    </None>
+    <None Include="Media\Shaders\ScreenShake.frag">
+      <Filter>Shaders\Fragment</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

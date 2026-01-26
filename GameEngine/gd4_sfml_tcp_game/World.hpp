@@ -10,6 +10,8 @@
 #include "CommandQueue.hpp"
 #include "BloomEffect.hpp"
 #include "SoundPlayer.hpp"
+#include "ChromaticAberrationEffect.hpp"
+#include "ScreenShakeEffect.hpp"
 
 #include <array>
 
@@ -37,6 +39,9 @@ public:
 	int GetWinner() const;
 	bool ShouldReturnToMenu() const;
 
+	void TriggerDamageEffect();
+	void TriggerScreenShake(float intensity, float duration);
+
 private:
 	void LoadTextures();
 	void BuildScene();
@@ -63,6 +68,9 @@ private:
 	int CountAlivePlayers() const;
 	void UpdateScoreDisplay();
 	void UpdateRoundOverlay();
+
+	void UpdateDamageEffect(sf::Time dt);
+	void UpdateScreenShake(sf::Time dt);
 
 private:
 	struct SpawnPoint
@@ -97,6 +105,17 @@ private:
 	std::vector<Aircraft*> m_active_enemies;
 
 	BloomEffect m_bloom_effect;
+	ChromaticAberrationEffect m_chromatic_effect;
+	float m_damage_effect_intensity;
+	sf::Time m_damage_effect_timer;
+	const float m_max_damage_intensity = 0.015f;
+	const sf::Time m_damage_effect_duration = sf::seconds(0.5f);
+
+	ScreenShakeEffect m_screen_shake_effect;
+	float m_screen_shake_intensity;
+	sf::Time m_screen_shake_timer;
+	sf::Time m_screen_shake_duration;
+	sf::Time m_screen_shake_time_accumulator;
 
 	std::vector<int> m_player_scores;
 	std::vector<sf::Vector2f> m_player_spawn_positions;
