@@ -2,6 +2,7 @@
 #include "Player.hpp"
 #include "MissionStatus.hpp"
 #include "InputDevice.hpp"
+#include "PlayerBindingManager.hpp"
 #include <iostream> 
 
 GameState::GameState(StateStack& stack, Context context) : State(stack, context), m_world(*context.window, *context.fonts, *context.sounds), m_players{{ Player(0), Player(1) }}
@@ -84,6 +85,7 @@ bool GameState::Update(sf::Time dt)
 bool GameState::HandleEvent(const sf::Event& event)
 {
 	//Testing the input device detection
+	static PlayerBindingManager bindingManager;
 	static InputDeviceDetector detector;
 
 	if (detector.IsInputEvent(event))
@@ -91,8 +93,35 @@ bool GameState::HandleEvent(const sf::Event& event)
 		auto device = detector.DetectDeviceFromEvent(event);
 		if (device.has_value())
 		{
-			std::cout << "[TEST] Device detected: "
-				<< InputDeviceDetector::GetDeviceDescription(device.value()) << "\n";
+			//Try to bind to first unbound player
+			for (int i = 0; i < PlayerBindingManager::kMaxPlayers; ++i)
+			{
+				if (!bindingManager.IsPlayerBound(i))
+				{
+					if (bindingManager.TryBindPlayer(i, device.value()))
+					{
+						std::cout << "[TEST] Binding complete: " << bindingManager.GetBoundPlayerCount()
+							<< "/" << PlayerBindingManager::kMaxPlayers << " players bound\n";
+
+						if (bindingManager.IsBindingComplete())
+						{
+							std::cout << "[TEST] ALL PLAYERS BOUND! Ready to start game.\n";
+							//List all bindings
+							for (int j = 0; j < PlayerBindingManager::kMaxPlayers; ++j)
+							{
+								auto playerDevice = bindingManager.GetPlayerDevice(j);
+								if (playerDevice.has_value())
+								{
+									std::cout << "[TEST] Player " << (j + 1) << " -> "
+										<< InputDeviceDetector::GetDeviceDescription(playerDevice.value()) << "\n";
+								}
+							}
+						}
+					}
+					//Only bind to first unbound player
+					break;
+				}
+			}
 		}
 	}
 
