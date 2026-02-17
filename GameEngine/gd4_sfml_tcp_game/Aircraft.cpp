@@ -168,6 +168,20 @@ void Aircraft::CollectMissile(unsigned int count)
 {
 	m_missile_ammo += count;
 }
+void Aircraft::IncreaseDamage()
+{
+
+}
+
+void Aircraft::IncreaseJumpHeight()
+{
+
+}
+
+void Aircraft::IncreaseSpeed()
+{
+
+}
 
 void Aircraft::UpdateTexts()
 {

@@ -21,6 +21,9 @@ public:
 	void IncreaseFireRate();
 	void IncreaseFireSpread();
 	void CollectMissile(unsigned int count);
+	void IncreaseDamage();
+	void IncreaseJumpHeight();
+	void IncreaseSpeed();
 
 	void UpdateTexts();
 	void UpdateMovementPattern(sf::Time dt);

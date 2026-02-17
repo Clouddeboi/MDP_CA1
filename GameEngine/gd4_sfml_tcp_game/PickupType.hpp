@@ -5,5 +5,8 @@ enum class PickupType
 	kMissileRefill, 
 	kFireSpread,
 	kFireRate,
+	kDamageBoost,
+	kJumpBoost,
+	kSpeedBoost,
 	kPickupCount
 };

@@ -43,6 +43,8 @@ struct PickupData
 	std::function<void(Aircraft&)> m_action;
 	TextureID m_texture;
 	sf::IntRect m_texture_rect;
+	SoundEffect m_collect_sound;
+	sf::Time m_duration;
 };
 
 struct ParticleData
