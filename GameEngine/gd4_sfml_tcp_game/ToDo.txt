@@ -3,7 +3,7 @@ To-Do list
 -Fix projectile collision detection with boxes
 -Update Music and Sound effects - DONE
 -Fix player health UI display (change the text to black) - DONE
--Add screen shake effect when hit
+-Add screen shake effect when hit - DONE
 -Add Chromatic aberration effect when hit - DONE
 -Add player input device screen (something like press any button to join, then pairs the first input to the first available player and so on) - DONE
 -Update UI (main menu, pause menu, in-game UI, buttons)
