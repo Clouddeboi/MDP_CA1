@@ -864,6 +864,8 @@ void World::SpawnPickups()
 	int random_type = std::rand() % static_cast<int>(PickupType::kPickupCount);
 	PickupType type = static_cast<PickupType>(random_type);
 
+	std::cout << "Spawning pickup type: " << random_type << " at (" << spawn_x << ", " << spawn_y << ")" << std::endl;
+
 	std::unique_ptr<Pickup> pickup(new Pickup(type, m_textures));
 	pickup->setPosition({ spawn_x, spawn_y });
 	pickup->SetVelocity(0.f, 0.f);//Gravity will handle falling
@@ -1005,6 +1007,10 @@ void World::HandleCollisions()
 		{
 			auto& player = static_cast<Aircraft&>(*pair.first);
 			auto& pickup = static_cast<Pickup&>(*pair.second);
+
+			std::cout << "Player " << player.GetPlayerId() << " collected pickup type: "
+				<< static_cast<int>(pickup.GetPickupType()) << std::endl;
+
 			//Collision response
 			pickup.Apply(player);
 			pickup.Destroy();

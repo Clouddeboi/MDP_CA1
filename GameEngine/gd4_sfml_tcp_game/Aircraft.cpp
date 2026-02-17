@@ -67,6 +67,11 @@ Aircraft::Aircraft(AircraftType type, const TextureHolder& textures, const FontH
 	, m_gun_world_rotation(0.f)
 	, m_gun_current_world_rotation(0.f)
 	, m_gun_rotation_speed(720.f)
+	, m_base_speed(Table[static_cast<int>(type)].m_speed)
+	, m_base_jump_speed(750.f)
+	, m_base_fire_rate(1)
+	, m_base_spread_level(1)
+	, m_damage_multiplier(1.0f)
 
 {
 	m_explosion.SetFrameSize(sf::Vector2i(256, 256));
@@ -170,17 +175,118 @@ void Aircraft::CollectMissile(unsigned int count)
 }
 void Aircraft::IncreaseDamage()
 {
-
+	m_damage_multiplier = 2.0f;
 }
 
 void Aircraft::IncreaseJumpHeight()
 {
-
+	m_jump_speed = m_base_jump_speed * 1.5f;
 }
 
 void Aircraft::IncreaseSpeed()
 {
 
+}
+
+void Aircraft::ApplyPowerUp(PickupType type, sf::Time duration)
+{
+	for (auto& effect : m_active_powerups)
+	{
+		if (effect.type == type)
+		{
+			//Refresh duration (don't stack)
+			effect.remaining_duration = duration;
+			return;
+		}
+	}
+
+	PowerUpEffect new_effect;
+	new_effect.type = type;
+	new_effect.remaining_duration = duration;
+	m_active_powerups.push_back(new_effect);
+
+	switch (type)
+	{
+	case PickupType::kFireSpread:
+		IncreaseFireSpread();
+		break;
+	case PickupType::kFireRate:
+		IncreaseFireRate();
+		break;
+	case PickupType::kDamageBoost:
+		IncreaseDamage();
+		break;
+	case PickupType::kJumpBoost:
+		IncreaseJumpHeight();
+		break;
+	case PickupType::kSpeedBoost:
+		//Speed boost is handled in GetMaxSpeed()
+		break;
+	default:
+		break;
+	}
+}
+
+bool Aircraft::HasActivePowerUp(PickupType type) const
+{
+	for (const auto& effect : m_active_powerups)
+	{
+		if (effect.type == type)
+			return true;
+	}
+	return false;
+}
+
+float Aircraft::GetDamageMultiplier() const
+{
+	return m_damage_multiplier;
+}
+
+void Aircraft::UpdatePowerUps(sf::Time dt, CommandQueue& commands)
+{
+	//Tick down all power-up timers
+	for (auto it = m_active_powerups.begin(); it != m_active_powerups.end(); )
+	{
+		it->remaining_duration -= dt;
+
+		if (it->remaining_duration <= sf::Time::Zero)
+		{
+			//Power-up expired, play sound and remove effect
+			PlayLocalSound(commands, SoundEffect::kPowerUpExpired);
+			RemovePowerUp(it->type);
+			it = m_active_powerups.erase(it);
+		}
+		else
+		{
+			++it;
+		}
+	}
+}
+
+void Aircraft::RemovePowerUp(PickupType type)
+{
+	switch (type)
+	{
+	case PickupType::kFireSpread:
+		if (m_spread_level > m_base_spread_level)
+			--m_spread_level;
+		break;
+	case PickupType::kFireRate:
+		if (m_fire_rate > m_base_fire_rate)
+			--m_fire_rate;
+		break;
+	case PickupType::kDamageBoost:
+		m_damage_multiplier = 1.0f;
+		break;
+	case PickupType::kJumpBoost:
+		m_jump_speed = m_base_jump_speed;
+		break;
+	case PickupType::kSpeedBoost:
+		//Speed automatically reverts via GetMaxSpeed()
+		break;
+	default:
+		break;
+	}
 }
 
 void Aircraft::UpdateTexts()
@@ -224,7 +330,15 @@ void Aircraft::UpdateMovementPattern(sf::Time dt)
 
 float Aircraft::GetMaxSpeed() const
 {
-	return Table[static_cast<int>(m_type)].m_speed;
+	float base_speed = Table[static_cast<int>(m_type)].m_speed;
+
+
+	if (HasActivePowerUp(PickupType::kSpeedBoost))
+	{
+		return base_speed * 1.75f;
+	}
+
+	return base_speed;
 }
 
 void Aircraft::Fire()
@@ -403,6 +517,8 @@ void Aircraft::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 
 		return;
 	}
+
+	UpdatePowerUps(dt, commands);
 
 	Entity::UpdateCurrent(dt, commands);
 	UpdateTexts();

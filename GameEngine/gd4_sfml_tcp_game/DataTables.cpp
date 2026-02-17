@@ -102,31 +102,46 @@ std::vector<PickupData> InitializePickupData()
     data[static_cast<int>(PickupType::kFireSpread)].m_texture_rect = sf::IntRect({ 80, 64 }, { 40, 40 });
     data[static_cast<int>(PickupType::kFireSpread)].m_collect_sound = SoundEffect::kCollectFireSpread;
     data[static_cast<int>(PickupType::kFireSpread)].m_duration = sf::seconds(10.f);
-    data[static_cast<int>(PickupType::kFireSpread)].m_action = std::bind(&Aircraft::IncreaseFireSpread, std::placeholders::_1);
+    data[static_cast<int>(PickupType::kFireSpread)].m_action = [](Aircraft& a)
+        {
+            a.ApplyPowerUp(PickupType::kFireSpread, sf::seconds(10.f));
+        };
 
     data[static_cast<int>(PickupType::kFireRate)].m_texture = TextureID::kEntities;
     data[static_cast<int>(PickupType::kFireRate)].m_texture_rect = sf::IntRect({ 120, 64 }, { 40, 40 });
     data[static_cast<int>(PickupType::kFireRate)].m_collect_sound = SoundEffect::kCollectFireRate;
     data[static_cast<int>(PickupType::kFireRate)].m_duration = sf::seconds(10.f);
-    data[static_cast<int>(PickupType::kFireRate)].m_action = std::bind(&Aircraft::IncreaseFireRate, std::placeholders::_1);
+    data[static_cast<int>(PickupType::kFireRate)].m_action = [](Aircraft& a)
+        {
+            a.ApplyPowerUp(PickupType::kFireRate, sf::seconds(10.f));
+        };
 
     data[static_cast<int>(PickupType::kDamageBoost)].m_texture = TextureID::kEntities;
     data[static_cast<int>(PickupType::kDamageBoost)].m_texture_rect = sf::IntRect({ 40, 64 }, { 40, 40 });
     data[static_cast<int>(PickupType::kDamageBoost)].m_collect_sound = SoundEffect::kCollectDamage;
     data[static_cast<int>(PickupType::kDamageBoost)].m_duration = sf::seconds(8.f);
-    data[static_cast<int>(PickupType::kDamageBoost)].m_action = std::bind(&Aircraft::IncreaseDamage, std::placeholders::_1);
+    data[static_cast<int>(PickupType::kDamageBoost)].m_action = [](Aircraft& a)
+        {
+            a.ApplyPowerUp(PickupType::kDamageBoost, sf::seconds(8.f));
+        };
 
     data[static_cast<int>(PickupType::kJumpBoost)].m_texture = TextureID::kEntities;
     data[static_cast<int>(PickupType::kJumpBoost)].m_texture_rect = sf::IntRect({ 160, 64 }, { 40, 40 });
     data[static_cast<int>(PickupType::kJumpBoost)].m_collect_sound = SoundEffect::kCollectJump;
     data[static_cast<int>(PickupType::kJumpBoost)].m_duration = sf::seconds(12.f);
-    data[static_cast<int>(PickupType::kJumpBoost)].m_action = std::bind(&Aircraft::IncreaseJumpHeight, std::placeholders::_1);
+    data[static_cast<int>(PickupType::kJumpBoost)].m_action = [](Aircraft& a)
+        {
+            a.ApplyPowerUp(PickupType::kJumpBoost, sf::seconds(12.f));
+        };
 
     data[static_cast<int>(PickupType::kSpeedBoost)].m_texture = TextureID::kEntities;
     data[static_cast<int>(PickupType::kSpeedBoost)].m_texture_rect = sf::IntRect({ 200, 64 }, { 40, 40 });
     data[static_cast<int>(PickupType::kSpeedBoost)].m_collect_sound = SoundEffect::kCollectSpeed;
     data[static_cast<int>(PickupType::kSpeedBoost)].m_duration = sf::seconds(8.f);
-    data[static_cast<int>(PickupType::kSpeedBoost)].m_action = std::bind(&Aircraft::IncreaseSpeed, std::placeholders::_1);
+    data[static_cast<int>(PickupType::kSpeedBoost)].m_action = [](Aircraft& a)
+        {
+            a.ApplyPowerUp(PickupType::kSpeedBoost, sf::seconds(8.f));
+        };
 
     return data;
 }
