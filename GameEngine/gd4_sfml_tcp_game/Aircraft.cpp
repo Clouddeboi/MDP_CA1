@@ -381,7 +381,7 @@ void Aircraft::CreateBullet(SceneNode& node, const TextureHolder& textures) cons
 
 void Aircraft::CreateProjectile(SceneNode& node, ProjectileType type, float x_offset, float y_offset, const TextureHolder& textures) const
 {
-	std::unique_ptr<Projectile> projectile(new Projectile(type, textures));
+	std::unique_ptr<Projectile> projectile(new Projectile(type, textures, m_damage_multiplier));
 
 	const sf::Vector2f gun_world_pos = (m_has_gun && m_gun_sprite)
 		? (GetWorldPosition() + RotateVectorDeg(m_gun_offset, m_gun_current_world_rotation))

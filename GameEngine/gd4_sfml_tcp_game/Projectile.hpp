@@ -7,6 +7,7 @@ class Projectile : public Entity
 {
 public:
 	Projectile(ProjectileType type, const TextureHolder& textures);
+	Projectile(ProjectileType type, const TextureHolder& textures, float damage_multiplier);
 	void GuideTowards(sf::Vector2f position);
 	bool IsGuided() const;
 
@@ -23,5 +24,6 @@ private:
 	ProjectileType m_type;
 	sf::Sprite m_sprite;
 	sf::Vector2f m_target_direction;
+	float m_damage_multiplier;
 };
 
