@@ -88,7 +88,8 @@ void World::Update(sf::Time dt)
 		//Target only specific entity categories
 		gravity.category = static_cast<int>(ReceiverCategories::kAircraft) 
 			| static_cast<int>(ReceiverCategories::kProjectile)
-			| static_cast<int>(ReceiverCategories::kBox);
+			| static_cast<int>(ReceiverCategories::kBox)
+			| static_cast<int>(ReceiverCategories::kPickup);
 
 		const float gravityAcceleration = 200.f * 9.81f;
 		gravity.action = DerivedAction<Entity>([gravityAcceleration](Entity& e, sf::Time)
@@ -849,7 +850,9 @@ sf::FloatRect World::GetBattleFieldBounds() const
 void World::DestroyEntitiesOutsideView()
 {
 	Command command;
-	command.category = static_cast<int>(ReceiverCategories::kEnemyAircraft) | static_cast<int>(ReceiverCategories::kProjectile);
+	command.category = static_cast<int>(ReceiverCategories::kEnemyAircraft) 
+		| static_cast<int>(ReceiverCategories::kProjectile) 
+		| static_cast<int>(ReceiverCategories::kPickup); ;
 	command.action = DerivedAction<Entity>([this](Entity& e, sf::Time dt)
 		{
 			//Does the object intersect with the battlefield
@@ -958,6 +961,15 @@ void World::HandleCollisions()
 			pickup.Apply(player);
 			pickup.Destroy();
 			player.PlayLocalSound(m_command_queue, SoundEffect::kCollectPickup);
+		}
+		else if (MatchesCategories(pair, ReceiverCategories::kPlayerAircraft, ReceiverCategories::kPickup))
+		{
+			auto& player = static_cast<Aircraft&>(*pair.first);
+			auto& pickup = static_cast<Pickup&>(*pair.second);
+			//Collision response
+			pickup.Apply(player);
+			pickup.Destroy();
+			player.PlayLocalSound(m_command_queue, pickup.GetCollectSound());
 		}
 		else if (MatchesCategories(pair, ReceiverCategories::kProjectile, ReceiverCategories::kPlatform))
 		{
