@@ -332,7 +332,6 @@ float Aircraft::GetMaxSpeed() const
 {
 	float base_speed = Table[static_cast<int>(m_type)].m_speed;
 
-
 	if (HasActivePowerUp(PickupType::kSpeedBoost))
 	{
 		return base_speed * 1.75f;

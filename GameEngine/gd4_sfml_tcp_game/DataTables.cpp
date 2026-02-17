@@ -11,7 +11,7 @@ std::vector<AircraftData> InitializeAircraftData()
 
     //Player 1
     data[static_cast<int>(AircraftType::kEagle)].m_hitpoints = 100;
-    data[static_cast<int>(AircraftType::kEagle)].m_speed = 400.f;
+    data[static_cast<int>(AircraftType::kEagle)].m_speed = 250.f;
     data[static_cast<int>(AircraftType::kEagle)].m_fire_interval = sf::seconds(1);
     data[static_cast<int>(AircraftType::kEagle)].m_texture = TextureID::kEntities;
     data[static_cast<int>(AircraftType::kEagle)].m_texture_rect = sf::IntRect({ 576, 320 }, { 64, 64 });
@@ -23,7 +23,7 @@ std::vector<AircraftData> InitializeAircraftData()
 
     //Player 2
     data[static_cast<int>(AircraftType::kEaglePlayer2)].m_hitpoints = 100;
-    data[static_cast<int>(AircraftType::kEaglePlayer2)].m_speed = 400.f;
+    data[static_cast<int>(AircraftType::kEaglePlayer2)].m_speed = 250.f;
     data[static_cast<int>(AircraftType::kEaglePlayer2)].m_fire_interval = sf::seconds(1);
     data[static_cast<int>(AircraftType::kEaglePlayer2)].m_texture = TextureID::kEntities;
     data[static_cast<int>(AircraftType::kEaglePlayer2)].m_texture_rect = sf::IntRect({ 576, 256 }, { 64, 64 });
