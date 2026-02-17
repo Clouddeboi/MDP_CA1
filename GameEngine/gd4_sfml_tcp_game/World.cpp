@@ -35,6 +35,8 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	,m_screen_shake_timer(sf::Time::Zero)
 	,m_screen_shake_duration(sf::Time::Zero)
 	,m_screen_shake_time_accumulator(sf::Time::Zero)
+	,m_pickup_spawn_timer(sf::Time::Zero)
+	,m_pickup_spawn_interval(sf::seconds(5.f))
 {
 	LoadTextures();
 	BuildScene();
@@ -82,6 +84,13 @@ void World::Update(sf::Time dt)
 
 	UpdateDamageEffect(dt);
 	UpdateScreenShake(dt);
+
+	m_pickup_spawn_timer += dt;
+	if (m_pickup_spawn_timer >= m_pickup_spawn_interval)
+	{
+		SpawnPickups();
+		m_pickup_spawn_timer = sf::Time::Zero;
+	}
 
 	{
 		Command gravity;
@@ -248,6 +257,15 @@ void World::StartNewRound()
 			e.Destroy();
 		});
 	m_command_queue.Push(clearProjectiles);
+
+	Command clearPickups;
+	clearPickups.category = static_cast<int>(ReceiverCategories::kPickup);
+	clearPickups.action = DerivedAction<Entity>([](Entity& e, sf::Time)
+		{
+			e.Destroy();
+		});
+	m_command_queue.Push(clearPickups);
+	m_pickup_spawn_timer = sf::Time::Zero;
 
 	m_scenegraph.RemoveWrecks();
 }
@@ -830,6 +848,27 @@ void World::AddEnemy(AircraftType type, float relx, float rely)
 {
 	SpawnPoint spawn(type, m_spawn_position.x + relx, m_spawn_position.y - rely);
 	m_enemy_spawn_points.emplace_back(spawn);
+}
+
+void World::SpawnPickups()
+{
+	//Spawn pickups from top of screen at random X positions
+	sf::FloatRect view_bounds = GetViewBounds();
+	const float spawn_y = view_bounds.position.y - 50.f;
+
+	const float padding = 100.f;
+	const float min_x = view_bounds.position.x + padding;
+	const float max_x = view_bounds.position.x + view_bounds.size.x - padding;
+	const float spawn_x = min_x + static_cast<float>(std::rand()) / RAND_MAX * (max_x - min_x);
+
+	int random_type = std::rand() % static_cast<int>(PickupType::kPickupCount);
+	PickupType type = static_cast<PickupType>(random_type);
+
+	std::unique_ptr<Pickup> pickup(new Pickup(type, m_textures));
+	pickup->setPosition({ spawn_x, spawn_y });
+	pickup->SetVelocity(0.f, 0.f);//Gravity will handle falling
+
+	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(pickup));
 }
 
 sf::FloatRect World::GetViewBounds() const
