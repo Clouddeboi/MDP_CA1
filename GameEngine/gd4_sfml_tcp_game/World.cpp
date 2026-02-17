@@ -575,6 +575,7 @@ void World::LoadTextures()
 	m_textures.Load(TextureID::kFinishLine, "Media/Textures/FinishLine.png");
 
 	m_textures.Load(TextureID::kEntities, "Media/Textures/spritesheet_default.png");
+	m_textures.Load(TextureID::kPowerUps, "Media/Textures/Icons.png");
 	m_textures.Load(TextureID::kJungle, "Media/Textures/Background.png");
 	m_textures.Load(TextureID::kExplosion, "Media/Textures/Explosion.png");
 	m_textures.Load(TextureID::kParticle, "Media/Textures/Particle.png");
