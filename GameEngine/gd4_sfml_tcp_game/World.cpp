@@ -825,7 +825,7 @@ void World::BuildScene()
 	p1_score_display->SetOutlineColor(sf::Color::Black);
 	p1_score_display->SetOutlineThickness(3.f);
 	m_score_displays.push_back(p1_score_display.get());
-	m_scene_layers[static_cast<int>(SceneLayers::kBackground)]->AttachChild(std::move(p1_score_display));
+	m_scene_layers[static_cast<int>(SceneLayers::kUI)]->AttachChild(std::move(p1_score_display));
 
 	std::string* p2_score_text = new std::string("0");
 	std::unique_ptr<TextNode> p2_score_display(new TextNode(m_fonts, *p2_score_text));
@@ -835,7 +835,7 @@ void World::BuildScene()
 	p2_score_display->SetOutlineColor(sf::Color::Black);
 	p2_score_display->SetOutlineThickness(3.f);
 	m_score_displays.push_back(p2_score_display.get());
-	m_scene_layers[static_cast<int>(SceneLayers::kBackground)]->AttachChild(std::move(p2_score_display));
+	m_scene_layers[static_cast<int>(SceneLayers::kUI)]->AttachChild(std::move(p2_score_display));
 }
 
 void World::UpdateScoreDisplay()
