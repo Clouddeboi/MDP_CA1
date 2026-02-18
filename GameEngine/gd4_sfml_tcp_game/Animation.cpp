@@ -1,44 +1,31 @@
-#include "Animation.hpp"
+#include "animation.hpp"
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 
-Animation::Animation()
-    :m_num_frames(0)
-    , m_current_frame(0)
-    , m_duration(sf::Time::Zero)
-    , m_elapsed_time(sf::Time::Zero)
-    , m_repeat(false)
-    , m_sprite()
-{
-    sf::Texture t("");
-    m_sprite = std::make_unique<sf::Sprite>(sf::Sprite(t));
-}
 
-Animation::Animation(const sf::Texture& texture):
-    m_frame_size()
+Animation::Animation(const sf::Texture& texture)
+    :m_sprite(texture)
+    , m_frame_size()
     , m_num_frames(0)
     , m_current_frame(0)
     , m_duration(sf::Time::Zero)
     , m_elapsed_time(sf::Time::Zero)
     , m_repeat(false)
-
 {
-    sf::Texture t("Media/Textures/Bullet.png");
-    m_sprite = std::make_unique<sf::Sprite>(sf::Sprite(t));
 }
 
 void Animation::SetTexture(const sf::Texture& texture)
 {
-    m_sprite->setTexture(texture);
+    m_sprite.setTexture(texture);
 }
 
 const sf::Texture Animation::GetTexture() const
 {
-    return m_sprite->getTexture();
+    return m_sprite.getTexture();
 }
 
 void Animation::SetFrameSize(sf::Vector2i frame_size)
-{ 
+{
     m_frame_size = frame_size;
 }
 
@@ -102,8 +89,8 @@ void Animation::Update(sf::Time dt)
     sf::Time time_per_frame = m_duration / static_cast<float>(m_num_frames);
     m_elapsed_time += dt;
 
-    sf::Vector2i textureBounds(m_sprite->getTexture().getSize());
-    sf::IntRect textureRect = m_sprite->getTextureRect();
+    sf::Vector2i textureBounds(m_sprite.getTexture().getSize());
+    sf::IntRect textureRect = m_sprite.getTextureRect();
 
     if (m_current_frame == 0)
     {
@@ -139,11 +126,11 @@ void Animation::Update(sf::Time dt)
             m_current_frame++;
         }
     }
-    m_sprite->setTextureRect(textureRect);
+    m_sprite.setTextureRect(textureRect);
 }
 
 void Animation::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
     states.transform *= getTransform();
-    target.draw(*m_sprite, states);
+    target.draw(m_sprite, states);
 }

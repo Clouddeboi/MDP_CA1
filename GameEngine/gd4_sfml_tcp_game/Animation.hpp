@@ -7,7 +7,6 @@
 class Animation : public sf::Drawable, public sf::Transformable
 {
 public:
-	Animation();
 	explicit Animation(const sf::Texture& texture);
 
 	void SetTexture(const sf::Texture& texture);
@@ -37,7 +36,7 @@ private:
 	void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 
 private:
-	std::unique_ptr<sf::Sprite> m_sprite;
+	sf::Sprite m_sprite;
 	sf::Vector2i m_frame_size;
 	std::size_t m_num_frames;
 	std::size_t m_current_frame;
@@ -46,4 +45,3 @@ private:
 	bool m_repeat;
 
 };
-
