@@ -121,7 +121,7 @@ private:
 
 	std::vector<PickupSpawnPoint> m_pickup_spawn_points;
 	sf::Time m_pickup_spawn_timer;
-	const sf::Time m_pickup_spawn_interval;
+	sf::Time m_pickup_spawn_interval;
 
 	BloomEffect m_bloom_effect;
 	ChromaticAberrationEffect m_chromatic_effect;

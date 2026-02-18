@@ -99,7 +99,7 @@ std::vector<PickupData> InitializePickupData()
         };
 
     data[static_cast<int>(PickupType::kFireSpread)].m_texture = TextureID::kPowerUps;
-    data[static_cast<int>(PickupType::kFireSpread)].m_texture_rect = sf::IntRect({ 512, 448 }, { 64, 64 });
+    data[static_cast<int>(PickupType::kFireSpread)].m_texture_rect = sf::IntRect({ 448, 512 }, { 64, 64 });
     data[static_cast<int>(PickupType::kFireSpread)].m_collect_sound = SoundEffect::kCollectFireSpread;
     data[static_cast<int>(PickupType::kFireSpread)].m_duration = sf::seconds(10.f);
     data[static_cast<int>(PickupType::kFireSpread)].m_action = [](Aircraft& a)

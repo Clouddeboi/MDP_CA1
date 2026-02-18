@@ -7,6 +7,7 @@
 #include "Platform.hpp"
 #include "Box.hpp"
 #include <iostream>
+#include <ctime>  
 
 World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sounds)
 	:m_target(output_target)
@@ -38,6 +39,8 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	,m_pickup_spawn_timer(sf::Time::Zero)
 	,m_pickup_spawn_interval(sf::seconds(5.f))
 {
+	std::srand(static_cast<unsigned int>(std::time(nullptr)));
+
 	LoadTextures();
 	BuildScene();
 
@@ -89,6 +92,13 @@ void World::Update(sf::Time dt)
 	if (m_pickup_spawn_timer >= m_pickup_spawn_interval)
 	{
 		SpawnPickups();
+
+		//Randomized next spawn interval
+		float min_interval = 3.f;
+		float max_interval = 7.f;
+		float random_interval = min_interval + (static_cast<float>(std::rand()) / RAND_MAX) * (max_interval - min_interval);
+		m_pickup_spawn_interval = sf::seconds(random_interval);
+
 		m_pickup_spawn_timer = sf::Time::Zero;
 	}
 
@@ -857,21 +867,26 @@ void World::SpawnPickups()
 	sf::FloatRect view_bounds = GetViewBounds();
 	const float spawn_y = view_bounds.position.y - 50.f;
 
-	const float padding = 100.f;
-	const float min_x = view_bounds.position.x + padding;
-	const float max_x = view_bounds.position.x + view_bounds.size.x - padding;
+	//Increase padding variety for more spread
+	const float min_padding = 80.f;
+	const float max_padding = 200.f;
+	const float random_padding = min_padding + (static_cast<float>(std::rand()) / RAND_MAX) * (max_padding - min_padding);
+
+	const float min_x = view_bounds.position.x + random_padding;
+	const float max_x = view_bounds.position.x + view_bounds.size.x - random_padding;
 	const float spawn_x = min_x + static_cast<float>(std::rand()) / RAND_MAX * (max_x - min_x);
 
+	//Random pickup type
 	int random_type = std::rand() % static_cast<int>(PickupType::kPickupCount);
 	PickupType type = static_cast<PickupType>(random_type);
 
-	std::cout << "Spawning pickup type: " << random_type << " at (" << spawn_x << ", " << spawn_y << ")" << std::endl;
-
 	std::unique_ptr<Pickup> pickup(new Pickup(type, m_textures));
 	pickup->setPosition({ spawn_x, spawn_y });
-	pickup->SetVelocity(0.f, 0.f);//Gravity will handle falling
+	pickup->SetVelocity(0.f, 0.f); // Gravity will handle falling
 
 	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(pickup));
+
+	std::cout << "Pickup spawned successfully!" << std::endl;
 }
 
 sf::FloatRect World::GetViewBounds() const
