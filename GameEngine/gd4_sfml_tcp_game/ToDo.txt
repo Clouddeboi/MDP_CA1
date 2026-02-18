@@ -13,5 +13,5 @@ To-Do list
 
 Optional (if I have time)
 -Extra levels (diffrent premade platform, boxes and background layouts that get randomly chosen and loaded)
--Power-ups per round (like the cards in rounds, can just be simple damage multipliers)
+-Power-ups per round (like the cards in rounds, can just be simple damage multipliers) -> Changed: The powerups drop randomly from the air - DONE
 -Fix player input binding UI (show mouse inputs and controller buttons) <- (this should be done but im not sure if I will have time to figure it out)
