@@ -54,8 +54,6 @@ private:
 	void AddEnemy(AircraftType type, float relx, float rely);
 
 	void SpawnPickups();
-	void AddPickups();
-	void AddPickup(PickupType type, float x, float y);
 
 	sf::FloatRect GetViewBounds() const;
 	sf::FloatRect GetBattleFieldBounds() const;
@@ -77,6 +75,8 @@ private:
 
 	void UpdateDamageEffect(sf::Time dt);
 	void UpdateScreenShake(sf::Time dt);
+
+	void UpdateCameraZoom(sf::Time dt);
 
 private:
 	struct SpawnPoint
@@ -151,5 +151,16 @@ private:
 	std::vector<TextNode*> m_score_displays;
 	std::optional<sf::Text> m_round_over_text;
 	std::optional<sf::Text> m_round_countdown_text;
+
+	float m_current_zoom_level;
+	sf::View m_saved_camera_state;
+	bool m_camera_state_saved;
+	const float m_min_zoom = 1.0f;
+	const float m_max_zoom = 1.35f;
+	const float m_zoom_speed = 0.5f;
+	const float m_min_player_distance = 400.f;
+	const float m_max_player_distance = 900.f;
+
+	sf::FloatRect m_camera_play_bounds;
 };
 

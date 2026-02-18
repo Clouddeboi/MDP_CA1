@@ -23,7 +23,7 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	,m_scene_texture({ m_target.getSize().x, m_target.getSize().y })
 	,m_player_scores(2, 0)//2 players, 0 points
 	,m_current_round(1)
-	,m_points_to_win(1)
+	,m_points_to_win(2)
 	,m_round_over(false)
 	,m_round_restart_timer(sf::Time::Zero)
 	,m_round_restart_delay(sf::seconds(3.0f))
@@ -38,17 +38,18 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	,m_screen_shake_time_accumulator(sf::Time::Zero)
 	,m_pickup_spawn_timer(sf::Time::Zero)
 	,m_pickup_spawn_interval(sf::seconds(5.f))
+	,m_current_zoom_level(1.0f)
+	,m_camera_state_saved(false)
+	,m_camera_play_bounds({ 100.f, 100.f }, { 1080.f, 1080.f })
 {
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
 	LoadTextures();
 	BuildScene();
 
+	m_camera.zoom(1.0f);
 	sf::Vector2f cameraSize = m_camera.getSize();
-
-	m_camera.zoom(1.35f);
-	sf::Vector2f zoomedSize = cameraSize * 1.35f;
-	m_camera.setCenter({ zoomedSize.x / 2.f, zoomedSize.y / 2.f });
+	m_camera.setCenter({ m_world_bounds.size.x / 2.f, m_world_bounds.size.y / 2.f });
 
 	m_player_spawn_positions.push_back({ 200.f, 0.f });
 	m_player_spawn_positions.push_back({ 1200.f, 0.f });
@@ -69,6 +70,13 @@ void World::Update(sf::Time dt)
 {
 	if (m_game_over)
 	{
+		if (!m_camera_state_saved)
+		{
+			m_saved_camera_state = m_camera;
+			m_camera_state_saved = true;
+		}
+		m_camera = m_saved_camera_state;
+
 		m_game_over_timer += dt;
 		UpdateRoundOverlay();
 		return;
@@ -78,6 +86,20 @@ void World::Update(sf::Time dt)
 	{
 		m_round_restart_timer += dt;
 		UpdateRoundOverlay();
+
+		if (IsGameOver())
+		{
+			if (!m_camera_state_saved)
+			{
+				m_saved_camera_state = m_camera;
+				m_camera_state_saved = true;
+			}
+		}
+		else
+		{
+			UpdateCameraZoom(dt);
+		}
+
 		if (m_round_restart_timer >= m_round_restart_delay)
 		{
 			StartNewRound();
@@ -87,6 +109,7 @@ void World::Update(sf::Time dt)
 
 	UpdateDamageEffect(dt);
 	UpdateScreenShake(dt);
+	UpdateCameraZoom(dt);
 
 	m_pickup_spawn_timer += dt;
 	if (m_pickup_spawn_timer >= m_pickup_spawn_interval)
@@ -169,6 +192,76 @@ void World::Update(sf::Time dt)
 
 	CheckRoundEnd();
 	UpdateScoreDisplay();
+}
+
+void World::UpdateCameraZoom(sf::Time dt)
+{
+	std::vector<Aircraft*> alive_players;
+	for (Aircraft* player : m_player_aircrafts)
+	{
+		if (player && !player->IsDestroyed())
+		{
+			alive_players.push_back(player);
+		}
+	}
+
+	if (alive_players.empty())
+		return;
+
+	sf::Vector2f camera_target;
+	float target_zoom;
+
+	if (alive_players.size() == 1)
+	{
+		camera_target = alive_players[0]->getPosition();
+		target_zoom = m_max_zoom;
+	}
+	else
+	{
+		//Multiple players alive, calculate midpoint and dynamic zoom
+		sf::Vector2f sum_positions(0.f, 0.f);
+		for (Aircraft* player : alive_players)
+		{
+			sum_positions += player->getPosition();
+		}
+		camera_target = sum_positions / static_cast<float>(alive_players.size());
+
+		if (alive_players.size() >= 2)
+		{
+			sf::Vector2f player1_pos = alive_players[0]->getPosition();
+			sf::Vector2f player2_pos = alive_players[1]->getPosition();
+
+			sf::Vector2f diff = player2_pos - player1_pos;
+			float distance = std::sqrt(diff.x * diff.x + diff.y * diff.y);
+
+			float normalized_distance = (distance - m_min_player_distance) / (m_max_player_distance - m_min_player_distance);
+			normalized_distance = std::max(0.f, std::min(1.f, normalized_distance));
+
+			target_zoom = m_max_zoom - (normalized_distance * (m_max_zoom - m_min_zoom));
+		}
+		else
+		{
+			target_zoom = m_max_zoom;
+		}
+	}
+
+	float zoom_delta = target_zoom - m_current_zoom_level;
+	m_current_zoom_level += zoom_delta * m_zoom_speed * dt.asSeconds();
+
+	sf::Vector2f cameraSize = m_target.getDefaultView().getSize() * m_current_zoom_level;
+
+	float half_width = cameraSize.x / 2.f;
+	float half_height = cameraSize.y / 2.f;
+
+	camera_target.x = std::max(m_camera_play_bounds.position.x + half_width,
+		std::min(camera_target.x, m_camera_play_bounds.position.x + m_camera_play_bounds.size.x - half_width));
+	camera_target.y = std::max(m_camera_play_bounds.position.y + half_height,
+		std::min(camera_target.y, m_camera_play_bounds.position.y + m_camera_play_bounds.size.y - half_height));
+
+	m_camera = m_target.getDefaultView();
+	m_camera.zoom(m_current_zoom_level);
+
+	m_camera.setCenter(camera_target);
 }
 
 void World::CheckRoundEnd()
@@ -255,6 +348,7 @@ void World::StartNewRound()
 
 	m_current_round++;
 	m_round_over = false;
+	m_camera_state_saved = false;
 
 	RespawnPlayers();
 	UpdateScoreDisplay();
@@ -369,6 +463,7 @@ void World::UpdateRoundOverlay()
 		return;
 
 	sf::Vector2f view_size = m_target.getDefaultView().getSize();
+	sf::Vector2f view_center(view_size.x / 2.f, view_size.y / 2.f);
 
 	std::string message;
 	int last_round_winner = -1;
@@ -404,7 +499,8 @@ void World::UpdateRoundOverlay()
 
 	sf::FloatRect text_bounds = m_round_over_text->getLocalBounds();
 	m_round_over_text->setOrigin({ text_bounds.position.x + text_bounds.size.x / 2.f, text_bounds.position.y + text_bounds.size.y / 2.f });
-	m_round_over_text->setPosition({ view_size.x / 2.f, view_size.y * 0.4f });
+	m_round_over_text->setPosition({ view_center.x, view_center.y - 100.f });  // Fixed screen position
+
 	float remaining_time = (m_round_restart_delay - m_round_restart_timer).asSeconds();
 	int seconds = static_cast<int>(std::ceil(remaining_time));
 
@@ -419,7 +515,7 @@ void World::UpdateRoundOverlay()
 
 	sf::FloatRect countdown_bounds = m_round_countdown_text->getLocalBounds();
 	m_round_countdown_text->setOrigin({ countdown_bounds.position.x + countdown_bounds.size.x / 2.f, countdown_bounds.position.y + countdown_bounds.size.y / 2.f });
-	m_round_countdown_text->setPosition({ view_size.x / 2.f, view_size.y * 0.55f });
+	m_round_countdown_text->setPosition({ view_center.x, view_center.y + 50.f });  // Fixed screen position
 }
 
 void World::Draw()
@@ -483,6 +579,7 @@ void World::Draw()
 		sf::RectangleShape backgroundShape;
 		backgroundShape.setFillColor(sf::Color(0, 0, 0, 150));
 		backgroundShape.setSize(m_target.getDefaultView().getSize());
+		backgroundShape.setPosition({ 0.f, 0.f });
 
 		m_target.draw(backgroundShape);
 		m_target.draw(*m_round_over_text);
@@ -743,25 +840,30 @@ void World::BuildScene()
 
 void World::UpdateScoreDisplay()
 {
+	sf::FloatRect view_bounds = GetViewBounds();
+	const float padding = 20.f;
+	const float score_spacing = 60.f;
+
 	for (size_t i = 0; i < m_score_displays.size() && i < m_player_scores.size(); ++i)
 	{
 		if (m_score_displays[i])
 		{
 			m_score_displays[i]->SetString(std::to_string(m_player_scores[i]));
+
+			float y_position = view_bounds.position.y + padding + (i * score_spacing);
+			m_score_displays[i]->setPosition({ view_bounds.position.x + padding, y_position });
 		}
 	}
 }
 
 void World::AdaptPlayerPosition()
 {
-	//keep the player on the screen
-	sf::FloatRect view_bounds(m_camera.getCenter() - m_camera.getSize() / 2.f, m_camera.getSize());
-	const float border_distance = 20.f;
+	const float border_distance = 0.f;
 
-	const float left_bound = view_bounds.position.x + border_distance;
-	const float right_bound = view_bounds.position.x + view_bounds.size.x - border_distance;
-	const float top_bound = view_bounds.position.y + border_distance;
-	const float bottom_bound = view_bounds.position.y + view_bounds.size.y - border_distance;
+	const float left_bound = m_camera_play_bounds.position.x + border_distance;
+	const float right_bound = m_camera_play_bounds.position.x + m_camera_play_bounds.size.x - border_distance;
+	const float top_bound = m_camera_play_bounds.position.y + border_distance;
+	const float bottom_bound = m_camera_play_bounds.position.y + m_camera_play_bounds.size.y - border_distance;
 
 	for (Aircraft* player : m_player_aircrafts)
 	{
@@ -775,15 +877,18 @@ void World::AdaptPlayerPosition()
 		position.x = std::min(position.x, right_bound);
 		position.y = std::max(position.y, top_bound);
 		position.y = std::min(position.y, bottom_bound);
+
 		player->setPosition(position);
 
 		if (!player->IsKnockbackActive())
 		{
 			//Edge Detection
-			bool hit_left = (position.x == left_bound) && (oldPos.x < position.x);
-			bool hit_right = (position.x == right_bound) && (oldPos.x > position.x);
-			bool hit_top = (position.y == top_bound) && (oldPos.y < position.y);
-			bool hit_bottom = (position.y == bottom_bound) && (oldPos.y > position.y);
+			const float epsilon = 0.5f;
+
+			bool hit_left = std::abs(position.x - left_bound) < epsilon && oldPos.x < position.x;
+			bool hit_right = std::abs(position.x - right_bound) < epsilon && oldPos.x > position.x;
+			bool hit_top = std::abs(position.y - top_bound) < epsilon && oldPos.y < position.y;
+			bool hit_bottom = std::abs(position.y - bottom_bound) < epsilon && oldPos.y > position.y;
 
 			if (hit_left || hit_right || hit_top || hit_bottom)
 			{
