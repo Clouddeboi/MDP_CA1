@@ -11,7 +11,8 @@ namespace
 }
 
 Projectile::Projectile(ProjectileType type, const TextureHolder& textures)
-    : Entity(1), m_type(type), m_sprite(textures.Get(Table[static_cast<int>(type)].m_texture), Table[static_cast<int>(type)].m_texture_rect)
+    : Entity(1), m_type(type), m_sprite(textures.Get(Table[static_cast<int>(type)].m_texture)
+        , Table[static_cast<int>(type)].m_texture_rect), m_damage_multiplier(1.0f)
 {
     Utility::CentreOrigin(m_sprite);
 
@@ -32,6 +33,34 @@ Projectile::Projectile(ProjectileType type, const TextureHolder& textures)
 
         std::unique_ptr<EmitterNode> propellant(new EmitterNode(ParticleType::kPropellant));
         propellant->setPosition({0.f, GetBoundingRect().size.y / 2.f});
+        AttachChild(std::move(propellant));
+    }
+}
+Projectile::Projectile(ProjectileType type, const TextureHolder& textures, float damage_multiplier)
+    : Entity(1)
+    , m_type(type)
+    , m_sprite(textures.Get(Table[static_cast<int>(type)].m_texture), Table[static_cast<int>(type)].m_texture_rect)
+    , m_damage_multiplier(damage_multiplier)
+{
+    Utility::CentreOrigin(m_sprite);
+
+    SetUsePhysics(true);
+
+    if (m_type == ProjectileType::kAlliedBullet || m_type == ProjectileType::kEnemyBullet)
+    {
+        SetMass(0.1f);
+        SetLinearDrag(0.0f);
+    }
+
+    //Add particle system for missiles
+    if (IsGuided())
+    {
+        std::unique_ptr<EmitterNode> smoke(new EmitterNode(ParticleType::kSmoke));
+        smoke->setPosition({ 0.f, GetBoundingRect().size.y / 2.f });
+        AttachChild(std::move(smoke));
+
+        std::unique_ptr<EmitterNode> propellant(new EmitterNode(ParticleType::kPropellant));
+        propellant->setPosition({ 0.f, GetBoundingRect().size.y / 2.f });
         AttachChild(std::move(propellant));
     }
 }
@@ -78,7 +107,7 @@ float Projectile::GetMaxSpeed() const
 
 float Projectile::GetDamage() const
 {
-    return Table[static_cast<int>(m_type)].m_damage;
+    return Table[static_cast<int>(m_type)].m_damage * m_damage_multiplier;
 }
 
 void Projectile::UpdateCurrent(sf::Time dt, CommandQueue& commands)

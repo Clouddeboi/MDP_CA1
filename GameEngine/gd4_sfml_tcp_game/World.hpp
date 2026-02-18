@@ -12,6 +12,7 @@
 #include "SoundPlayer.hpp"
 #include "ChromaticAberrationEffect.hpp"
 #include "ScreenShakeEffect.hpp"
+#include "PickupType.hpp"
 
 #include <array>
 
@@ -51,6 +52,11 @@ private:
 	void SpawnEnemies();
 	void AddEnemies();
 	void AddEnemy(AircraftType type, float relx, float rely);
+
+	void SpawnPickups();
+	void AddPickups();
+	void AddPickup(PickupType type, float x, float y);
+
 	sf::FloatRect GetViewBounds() const;
 	sf::FloatRect GetBattleFieldBounds() const;
 
@@ -83,6 +89,15 @@ private:
 		float m_x;
 		float m_y;
 	};
+	struct PickupSpawnPoint
+	{
+		PickupSpawnPoint(PickupType type, float x, float y) : m_type(type), m_x(x), m_y(y)
+		{
+		}
+		PickupType m_type;
+		float m_x;
+		float m_y;
+	};
 
 private:
 	sf::RenderTarget& m_target;
@@ -103,6 +118,10 @@ private:
 
 	std::vector<SpawnPoint> m_enemy_spawn_points;
 	std::vector<Aircraft*> m_active_enemies;
+
+	std::vector<PickupSpawnPoint> m_pickup_spawn_points;
+	sf::Time m_pickup_spawn_timer;
+	sf::Time m_pickup_spawn_interval;
 
 	BloomEffect m_bloom_effect;
 	ChromaticAberrationEffect m_chromatic_effect;

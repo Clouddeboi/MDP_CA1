@@ -11,5 +11,12 @@ enum class SoundEffect
 	kError,
 	kStartGame,
 	kPairedPlayer,
-	kButtonClick
+	kButtonClick,
+	kCollectHealth,
+	kCollectFireSpread,
+	kCollectFireRate,
+	kCollectDamage,
+	kCollectJump,
+	kCollectSpeed,
+	kPowerUpExpired
 };

@@ -275,23 +275,30 @@ int Player::GetPlayerId() const
 
 void Player::InitialiseActions()
 {
-    const float kPlayerSpeed = 200.f;
-    m_action_binding[Action::kMoveLeft].action = DerivedAction<Aircraft>(AircraftMover(-kPlayerSpeed, 0.f));
-    m_action_binding[Action::kMoveRight].action = DerivedAction<Aircraft>(AircraftMover(kPlayerSpeed, 0.f));
+    m_action_binding[Action::kMoveLeft].action = DerivedAction<Aircraft>([](Aircraft& a, sf::Time dt)
+        {
+            float speed = a.GetMaxSpeed();
+            a.SetVelocity(-speed, a.GetVelocity().y);
+        });
+
+    m_action_binding[Action::kMoveRight].action = DerivedAction<Aircraft>([](Aircraft& a, sf::Time dt)
+        {
+            float speed = a.GetMaxSpeed();
+            a.SetVelocity(speed, a.GetVelocity().y);
+        });
+
     m_action_binding[Action::kBulletFire].action = DerivedAction<Aircraft>([](Aircraft& a, sf::Time dt)
         {
             a.Fire();
-        }
-    );
+        });
+
     m_action_binding[Action::kJump].action = DerivedAction<Aircraft>([](Aircraft& a, sf::Time)
         {
             if (a.IsOnGround())
             {
                 a.Jump();
             }
-        }
-    );
-
+        });
 }
 
 bool Player::IsRealTimeAction(Action action)

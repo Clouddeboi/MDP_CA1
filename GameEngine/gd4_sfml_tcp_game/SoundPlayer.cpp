@@ -29,6 +29,14 @@ SoundPlayer::SoundPlayer()
 	m_sound_buffers.Load(SoundEffect::kStartGame, "Media/Sound/StartGame.wav");
 	m_sound_buffers.Load(SoundEffect::kPairedPlayer, "Media/Sound/PairedPlayer.wav");
 
+	m_sound_buffers.Load(SoundEffect::kCollectHealth, "Media/Sound/CollectPickup.wav");
+	m_sound_buffers.Load(SoundEffect::kCollectFireSpread, "Media/Sound/CollectPickup.wav");
+	m_sound_buffers.Load(SoundEffect::kCollectFireRate, "Media/Sound/CollectPickup.wav");
+	m_sound_buffers.Load(SoundEffect::kCollectDamage, "Media/Sound/CollectPickup.wav");
+	m_sound_buffers.Load(SoundEffect::kCollectJump, "Media/Sound/CollectPickup.wav");
+	m_sound_buffers.Load(SoundEffect::kCollectSpeed, "Media/Sound/CollectPickup.wav");
+	m_sound_buffers.Load(SoundEffect::kPowerUpExpired, "Media/Sound/Error.wav");
+
 	// Listener points towards the screen (default in SFML)
 	sf::Listener::setDirection({ 0.f, 0.f, -1.f });
 }

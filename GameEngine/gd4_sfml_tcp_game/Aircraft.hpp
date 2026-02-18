@@ -5,9 +5,11 @@
 #include "TextNode.hpp"
 #include "Utility.hpp"
 #include "ProjectileType.hpp"
+#include "PickupType.hpp" 
 #include <SFML/Graphics/Sprite.hpp>
 #include "Animation.hpp"
 #include "SpriteNode.hpp"
+#include <vector> 
 
 class Aircraft : public Entity
 {
@@ -21,6 +23,13 @@ public:
 	void IncreaseFireRate();
 	void IncreaseFireSpread();
 	void CollectMissile(unsigned int count);
+	void IncreaseDamage();
+	void IncreaseJumpHeight();
+	void IncreaseSpeed();
+
+	void ApplyPowerUp(PickupType type, sf::Time duration);
+	bool HasActivePowerUp(PickupType type) const;
+	float GetDamageMultiplier() const;
 
 	void UpdateTexts();
 	void UpdateMovementPattern(sf::Time dt);
@@ -53,7 +62,16 @@ private:
 	void CheckPickupDrop(CommandQueue& commands);
 	void UpdateRollAnimation();
 
+	void UpdatePowerUps(sf::Time dt, CommandQueue& commands);
+	void RemovePowerUp(PickupType type);
+
 private:
+	struct PowerUpEffect
+	{
+		PickupType type;
+		sf::Time remaining_duration;
+	};
+
 	AircraftType m_type;
 	sf::Sprite m_sprite;
 	Animation m_explosion;
@@ -91,5 +109,13 @@ private:
 	float m_gun_world_rotation = 0.f;
 	float m_gun_current_world_rotation = 0.f;
 	float m_gun_rotation_speed = 720.f;
+
+	std::vector<PowerUpEffect> m_active_powerups;
+
+	float m_base_speed;
+	float m_base_jump_speed;
+	unsigned int m_base_fire_rate;
+	unsigned int m_base_spread_level;
+	float m_damage_multiplier;
 };
 

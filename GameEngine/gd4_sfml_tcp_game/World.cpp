@@ -7,6 +7,7 @@
 #include "Platform.hpp"
 #include "Box.hpp"
 #include <iostream>
+#include <ctime>  
 
 World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sounds)
 	:m_target(output_target)
@@ -35,7 +36,11 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	,m_screen_shake_timer(sf::Time::Zero)
 	,m_screen_shake_duration(sf::Time::Zero)
 	,m_screen_shake_time_accumulator(sf::Time::Zero)
+	,m_pickup_spawn_timer(sf::Time::Zero)
+	,m_pickup_spawn_interval(sf::seconds(5.f))
 {
+	std::srand(static_cast<unsigned int>(std::time(nullptr)));
+
 	LoadTextures();
 	BuildScene();
 
@@ -83,12 +88,27 @@ void World::Update(sf::Time dt)
 	UpdateDamageEffect(dt);
 	UpdateScreenShake(dt);
 
+	m_pickup_spawn_timer += dt;
+	if (m_pickup_spawn_timer >= m_pickup_spawn_interval)
+	{
+		SpawnPickups();
+
+		//Randomized next spawn interval
+		float min_interval = 3.f;
+		float max_interval = 7.f;
+		float random_interval = min_interval + (static_cast<float>(std::rand()) / RAND_MAX) * (max_interval - min_interval);
+		m_pickup_spawn_interval = sf::seconds(random_interval);
+
+		m_pickup_spawn_timer = sf::Time::Zero;
+	}
+
 	{
 		Command gravity;
 		//Target only specific entity categories
 		gravity.category = static_cast<int>(ReceiverCategories::kAircraft) 
 			| static_cast<int>(ReceiverCategories::kProjectile)
-			| static_cast<int>(ReceiverCategories::kBox);
+			| static_cast<int>(ReceiverCategories::kBox)
+			| static_cast<int>(ReceiverCategories::kPickup);
 
 		const float gravityAcceleration = 200.f * 9.81f;
 		gravity.action = DerivedAction<Entity>([gravityAcceleration](Entity& e, sf::Time)
@@ -247,6 +267,15 @@ void World::StartNewRound()
 			e.Destroy();
 		});
 	m_command_queue.Push(clearProjectiles);
+
+	Command clearPickups;
+	clearPickups.category = static_cast<int>(ReceiverCategories::kPickup);
+	clearPickups.action = DerivedAction<Entity>([](Entity& e, sf::Time)
+		{
+			e.Destroy();
+		});
+	m_command_queue.Push(clearPickups);
+	m_pickup_spawn_timer = sf::Time::Zero;
 
 	m_scenegraph.RemoveWrecks();
 }
@@ -556,6 +585,7 @@ void World::LoadTextures()
 	m_textures.Load(TextureID::kFinishLine, "Media/Textures/FinishLine.png");
 
 	m_textures.Load(TextureID::kEntities, "Media/Textures/spritesheet_default.png");
+	m_textures.Load(TextureID::kPowerUps, "Media/Textures/Icons.png");
 	m_textures.Load(TextureID::kJungle, "Media/Textures/Background.png");
 	m_textures.Load(TextureID::kExplosion, "Media/Textures/Explosion.png");
 	m_textures.Load(TextureID::kParticle, "Media/Textures/Particle.png");
@@ -831,6 +861,34 @@ void World::AddEnemy(AircraftType type, float relx, float rely)
 	m_enemy_spawn_points.emplace_back(spawn);
 }
 
+void World::SpawnPickups()
+{
+	//Spawn pickups from top of screen at random X positions
+	sf::FloatRect view_bounds = GetViewBounds();
+	const float spawn_y = view_bounds.position.y - 50.f;
+
+	//Increase padding variety for more spread
+	const float min_padding = 80.f;
+	const float max_padding = 200.f;
+	const float random_padding = min_padding + (static_cast<float>(std::rand()) / RAND_MAX) * (max_padding - min_padding);
+
+	const float min_x = view_bounds.position.x + random_padding;
+	const float max_x = view_bounds.position.x + view_bounds.size.x - random_padding;
+	const float spawn_x = min_x + static_cast<float>(std::rand()) / RAND_MAX * (max_x - min_x);
+
+	//Random pickup type
+	int random_type = std::rand() % static_cast<int>(PickupType::kPickupCount);
+	PickupType type = static_cast<PickupType>(random_type);
+
+	std::unique_ptr<Pickup> pickup(new Pickup(type, m_textures));
+	pickup->setPosition({ spawn_x, spawn_y });
+	pickup->SetVelocity(0.f, 0.f); // Gravity will handle falling
+
+	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(pickup));
+
+	std::cout << "Pickup spawned successfully!" << std::endl;
+}
+
 sf::FloatRect World::GetViewBounds() const
 {
 	return sf::FloatRect(m_camera.getCenter() - m_camera.getSize()/2.f, m_camera.getSize());
@@ -849,7 +907,9 @@ sf::FloatRect World::GetBattleFieldBounds() const
 void World::DestroyEntitiesOutsideView()
 {
 	Command command;
-	command.category = static_cast<int>(ReceiverCategories::kEnemyAircraft) | static_cast<int>(ReceiverCategories::kProjectile);
+	command.category = static_cast<int>(ReceiverCategories::kEnemyAircraft) 
+		| static_cast<int>(ReceiverCategories::kProjectile) 
+		| static_cast<int>(ReceiverCategories::kPickup); ;
 	command.action = DerivedAction<Entity>([this](Entity& e, sf::Time dt)
 		{
 			//Does the object intersect with the battlefield
@@ -958,6 +1018,19 @@ void World::HandleCollisions()
 			pickup.Apply(player);
 			pickup.Destroy();
 			player.PlayLocalSound(m_command_queue, SoundEffect::kCollectPickup);
+		}
+		else if (MatchesCategories(pair, ReceiverCategories::kPlayerAircraft, ReceiverCategories::kPickup))
+		{
+			auto& player = static_cast<Aircraft&>(*pair.first);
+			auto& pickup = static_cast<Pickup&>(*pair.second);
+
+			std::cout << "Player " << player.GetPlayerId() << " collected pickup type: "
+				<< static_cast<int>(pickup.GetPickupType()) << std::endl;
+
+			//Collision response
+			pickup.Apply(player);
+			pickup.Destroy();
+			player.PlayLocalSound(m_command_queue, pickup.GetCollectSound());
 		}
 		else if (MatchesCategories(pair, ReceiverCategories::kProjectile, ReceiverCategories::kPlatform))
 		{
