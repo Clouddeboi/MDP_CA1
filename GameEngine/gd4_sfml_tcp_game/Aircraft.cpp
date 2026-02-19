@@ -72,6 +72,8 @@ Aircraft::Aircraft(AircraftType type, const TextureHolder& textures, const FontH
 	, m_base_fire_rate(1)
 	, m_base_spread_level(1)
 	, m_damage_multiplier(1.0f)
+	, m_just_jumped(false)
+	, m_just_landed(false)
 
 {
 	m_explosion.SetFrameSize(sf::Vector2i(256, 256));
@@ -493,19 +495,23 @@ sf::Vector2f Aircraft::GetGunOffset() const
 
 void Aircraft::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 {
+	if (m_player_id >= 0)
+	{
+		if (m_just_jumped)
+		{
+			PlayLocalSound(commands, GetRandomJumpSound());
+			m_just_jumped = false;
+		}
+
+		if (m_just_landed)
+		{
+			PlayLocalSound(commands, GetRandomJumpLandSound());
+			m_just_landed = false;
+		}
+	}
+
 	if (IsDestroyed() && m_player_id >= 0)
 	{
-		//CheckPickupDrop(commands);
-		//m_explosion.Update(dt);
-		//// Play explosion sound only once
-		//if (!m_played_explosion_sound)
-		//{
-		//	SoundEffect soundEffect = (Utility::RandomInt(2) == 0) ? SoundEffect::kExplosion1 : SoundEffect::kExplosion2;
-		//	PlayLocalSound(commands, soundEffect);
-
-		//	m_played_explosion_sound = true;
-		//}
-
 		SetVelocity(0.f, 0.f);
 
 		//Hide health display when dead
@@ -635,6 +641,33 @@ void Aircraft::PlayLocalSound(CommandQueue& commands, SoundEffect effect)
 	commands.Push(command);
 }
 
+SoundEffect Aircraft::GetRandomJumpSound() const
+{
+	int random = std::rand() % 5;
+
+	switch (random)
+	{
+	case 0: return SoundEffect::kPlayerJump1;
+	case 1: return SoundEffect::kPlayerJump2;
+	case 2: return SoundEffect::kPlayerJump3;
+	case 3: return SoundEffect::kPlayerJump4;
+	case 4: return SoundEffect::kPlayerJump5;
+	default: return SoundEffect::kPlayerJump1;
+	}
+}
+
+SoundEffect Aircraft::GetRandomJumpLandSound() const
+{
+	int random = std::rand() % 5;
+
+	switch (random)
+	{
+	case 0: return SoundEffect::kPlayerLand1;
+	case 1: return SoundEffect::kPlayerLand2;
+	default: return SoundEffect::kPlayerLand1;
+	}
+}
+
 void Aircraft::Jump()
 {
 	if (m_is_on_ground)
@@ -644,11 +677,13 @@ void Aircraft::Jump()
 		SetVelocity(vel);
 		m_is_on_ground = false;
 		move({ 0.f, -2.f });
+		m_just_jumped = true;
 	}
 }
 
 void Aircraft::SetOnGround(bool grounded)
 {
+	bool was_airborne = !m_is_on_ground;
 	m_is_on_ground = grounded;
 	if (m_is_on_ground)
 	{
@@ -657,6 +692,11 @@ void Aircraft::SetOnGround(bool grounded)
 		{
 			vel.y = 0.f;
 			SetVelocity(vel);
+		}
+
+		if (was_airborne)
+		{
+			m_just_landed = true;
 		}
 	}
 }

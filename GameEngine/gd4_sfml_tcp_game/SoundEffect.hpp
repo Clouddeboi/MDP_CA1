@@ -18,5 +18,14 @@ enum class SoundEffect
 	kCollectDamage,
 	kCollectJump,
 	kCollectSpeed,
-	kPowerUpExpired
+	kPowerUpExpired,
+	kPlayerJump1,
+	kPlayerJump2,
+	kPlayerJump3,
+	kPlayerJump4,
+	kPlayerJump5,
+	kPlayerLand1,
+	kPlayerLand2,
+	kPlayerHit,
+	kPlayerDeath
 };

@@ -65,6 +65,9 @@ private:
 	void UpdatePowerUps(sf::Time dt, CommandQueue& commands);
 	void RemovePowerUp(PickupType type);
 
+	SoundEffect GetRandomJumpSound() const;
+	SoundEffect GetRandomJumpLandSound() const;
+
 private:
 	struct PowerUpEffect
 	{
@@ -100,6 +103,8 @@ private:
 
 	bool m_is_on_ground;
 	float m_jump_speed;
+	bool m_just_jumped;
+	bool m_just_landed;
 
 	int m_player_id = -1;
 

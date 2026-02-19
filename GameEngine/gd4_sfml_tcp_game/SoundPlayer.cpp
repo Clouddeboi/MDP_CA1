@@ -37,6 +37,15 @@ SoundPlayer::SoundPlayer()
 	m_sound_buffers.Load(SoundEffect::kCollectSpeed, "Media/Sound/CollectPickup.wav");
 	m_sound_buffers.Load(SoundEffect::kPowerUpExpired, "Media/Sound/Error.wav");
 
+	m_sound_buffers.Load(SoundEffect::kPlayerJump1, "Media/Sound/Jump1.wav");
+	m_sound_buffers.Load(SoundEffect::kPlayerJump2, "Media/Sound/Jump2.wav");
+	m_sound_buffers.Load(SoundEffect::kPlayerJump3, "Media/Sound/Jump3.wav");
+	m_sound_buffers.Load(SoundEffect::kPlayerJump4, "Media/Sound/Jump4.wav");
+	m_sound_buffers.Load(SoundEffect::kPlayerJump5, "Media/Sound/Jump5.wav");
+
+	m_sound_buffers.Load(SoundEffect::kPlayerLand1, "Media/Sound/JumpLand1.wav");
+	m_sound_buffers.Load(SoundEffect::kPlayerLand2, "Media/Sound/JumpLand2.wav");
+
 	// Listener points towards the screen (default in SFML)
 	sf::Listener::setDirection({ 0.f, 0.f, -1.f });
 }
