@@ -16,8 +16,8 @@ namespace
 
 SoundPlayer::SoundPlayer()
 {
-	m_sound_buffers.Load(SoundEffect::kAlliedGunfire, "Media/Sound/AlliedGunfire.wav");
-	m_sound_buffers.Load(SoundEffect::kEnemyGunfire, "Media/Sound/EnemyGunfire.wav");
+	m_sound_buffers.Load(SoundEffect::kAlliedGunfire, "Media/Sound/GunShot.wav");
+	m_sound_buffers.Load(SoundEffect::kEnemyGunfire, "Media/Sound/GunShot.wav");
 	m_sound_buffers.Load(SoundEffect::kExplosion1, "Media/Sound/Explosion1.wav");
 	m_sound_buffers.Load(SoundEffect::kExplosion2, "Media/Sound/Explosion2.wav");
 	m_sound_buffers.Load(SoundEffect::kLaunchMissile, "Media/Sound/LaunchMissile.wav");
@@ -45,6 +45,11 @@ SoundPlayer::SoundPlayer()
 
 	m_sound_buffers.Load(SoundEffect::kPlayerLand1, "Media/Sound/JumpLand1.wav");
 	m_sound_buffers.Load(SoundEffect::kPlayerLand2, "Media/Sound/JumpLand2.wav");
+
+	m_sound_buffers.Load(SoundEffect::kPlayerHit1, "Media/Sound/Hit1.wav");
+	m_sound_buffers.Load(SoundEffect::kPlayerHit2, "Media/Sound/Hit2.wav");
+
+	m_sound_buffers.Load(SoundEffect::kPlayerDeath, "Media/Sound/Death.wav");
 
 	// Listener points towards the screen (default in SFML)
 	sf::Listener::setDirection({ 0.f, 0.f, -1.f });

@@ -43,6 +43,7 @@ public:
 	sf::FloatRect GetBoundingRect() const override;
 	bool IsMarkedForRemoval() const override;
 	void PlayLocalSound(CommandQueue& commands, SoundEffect effect);
+	void Damage(int points) override;
 
 	void Jump();
 	void SetOnGround(bool grounded);
@@ -67,6 +68,8 @@ private:
 
 	SoundEffect GetRandomJumpSound() const;
 	SoundEffect GetRandomJumpLandSound() const;
+	SoundEffect GetRandomHitSound() const;
+	SoundEffect GetRandomDeathSound() const;
 
 private:
 	struct PowerUpEffect
@@ -105,6 +108,9 @@ private:
 	float m_jump_speed;
 	bool m_just_jumped;
 	bool m_just_landed;
+
+	bool m_just_got_hit;
+	bool m_just_died;
 
 	int m_player_id = -1;
 

@@ -11,6 +11,11 @@ Jump SFX:
 -Jump_C_08 by cabled_mess -- https://freesound.org/s/350898/ -- License: Creative Commons 0
 -Jump_Landing_Wood_01.wav by IPaddeh -- https://freesound.org/s/422857/ -- License: Creative Commons 0
 -Jump_Landing_Wood_02.wav by IPaddeh -- https://freesound.org/s/422869/ -- License: Creative Commons 0
+GunShot - Damage sound effect by Raclure -- https://freesound.org/s/458867/ -- License: Creative Commons 0
+Player Hit:
+-Retro video game sfx - Punch by OwlStorm -- https://freesound.org/s/404723/ -- License: Creative Commons 0
+-Retro video game sfx - Punch 2 by OwlStorm -- https://freesound.org/s/404766/ -- License: Creative Commons 0
+Death: man_hurt_2.wav by cdakak -- https://freesound.org/s/641689/ -- License: Creative Commons 0
 
 Code:
 Chromatic Aberration Shader - https://lettier.github.io/3d-game-shaders-for-beginners/chromatic-aberration.html

@@ -26,6 +26,7 @@ enum class SoundEffect
 	kPlayerJump5,
 	kPlayerLand1,
 	kPlayerLand2,
-	kPlayerHit,
+	kPlayerHit1,
+	kPlayerHit2,
 	kPlayerDeath
 };

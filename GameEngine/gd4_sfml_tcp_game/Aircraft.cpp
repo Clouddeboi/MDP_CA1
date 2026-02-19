@@ -74,6 +74,8 @@ Aircraft::Aircraft(AircraftType type, const TextureHolder& textures, const FontH
 	, m_damage_multiplier(1.0f)
 	, m_just_jumped(false)
 	, m_just_landed(false)
+	, m_just_got_hit(false)
+	, m_just_died(false)
 
 {
 	m_explosion.SetFrameSize(sf::Vector2i(256, 256));
@@ -508,6 +510,18 @@ void Aircraft::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 			PlayLocalSound(commands, GetRandomJumpLandSound());
 			m_just_landed = false;
 		}
+
+		if (m_just_got_hit)
+		{
+			PlayLocalSound(commands, GetRandomHitSound());
+			m_just_got_hit = false;
+		}
+
+		if (m_just_died)
+		{
+			PlayLocalSound(commands, GetRandomDeathSound());
+			m_just_died = false;
+		}
 	}
 
 	if (IsDestroyed() && m_player_id >= 0)
@@ -641,6 +655,25 @@ void Aircraft::PlayLocalSound(CommandQueue& commands, SoundEffect effect)
 	commands.Push(command);
 }
 
+void Aircraft::Damage(int points)
+{
+	int old_hp = GetHitPoints();
+
+	Entity::Damage(points);
+
+	if (m_player_id >= 0)
+	{
+		if (IsDestroyed() && old_hp > 0)
+		{
+			m_just_died = true;
+		}
+		else if (!IsDestroyed())
+		{
+			m_just_got_hit = true;
+		}
+	}
+}
+
 SoundEffect Aircraft::GetRandomJumpSound() const
 {
 	int random = std::rand() % 5;
@@ -658,13 +691,36 @@ SoundEffect Aircraft::GetRandomJumpSound() const
 
 SoundEffect Aircraft::GetRandomJumpLandSound() const
 {
-	int random = std::rand() % 5;
+	int random = std::rand() % 2;
 
 	switch (random)
 	{
 	case 0: return SoundEffect::kPlayerLand1;
 	case 1: return SoundEffect::kPlayerLand2;
 	default: return SoundEffect::kPlayerLand1;
+	}
+}
+
+SoundEffect Aircraft::GetRandomHitSound() const
+{
+	int random = std::rand() % 2;
+
+	switch (random)
+	{
+	case 0: return SoundEffect::kPlayerHit1;
+	case 1: return SoundEffect::kPlayerHit2;
+	default: return SoundEffect::kPlayerHit1;
+	}
+}
+
+SoundEffect Aircraft::GetRandomDeathSound() const
+{
+	int random = std::rand() % 1;
+
+	switch (random)
+	{
+	case 0: return SoundEffect::kPlayerDeath;
+	default: return SoundEffect::kPlayerDeath;
 	}
 }
 
