@@ -40,7 +40,7 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	,m_pickup_spawn_interval(sf::seconds(5.f))
 	,m_current_zoom_level(1.0f)
 	,m_camera_state_saved(false)
-	,m_camera_play_bounds({ 100.f, 100.f }, { 1080.f, 1080.f })
+	,m_camera_play_bounds({ 50.f, 50.f }, { 1240.f, 1240.f })
 {
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
@@ -52,7 +52,7 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	m_camera.setCenter({ m_world_bounds.size.x / 2.f, m_world_bounds.size.y / 2.f });
 
 	m_player_spawn_positions.push_back({ 200.f, 0.f });
-	m_player_spawn_positions.push_back({ 1200.f, 0.f });
+	m_player_spawn_positions.push_back({ 1100.f, 0.f });
 
 	m_round_over_text.emplace(m_fonts.Get(Font::kMain), "", 80);
 	m_round_over_text->setFillColor(sf::Color::White);
