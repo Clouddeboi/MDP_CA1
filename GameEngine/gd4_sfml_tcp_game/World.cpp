@@ -190,6 +190,12 @@ void World::Update(sf::Time dt)
 	HandleCollisions();
 	m_scenegraph.RemoveWrecks();
 
+	m_scenegraph.Update(sf::Time::Zero, m_command_queue);
+	while (!m_command_queue.IsEmpty())
+	{
+		m_scenegraph.OnCommand(m_command_queue.Pop(), dt);
+	}
+
 	CheckRoundEnd();
 	UpdateScoreDisplay();
 }
@@ -284,6 +290,7 @@ void World::CheckRoundEnd()
 	{
 		m_round_over = true;
 		m_round_restart_timer = sf::Time::Zero;
+
 
 		std::cout << "\n=== ROUND " << m_current_round << " OVER ===" << std::endl;
 		for (size_t i = 0; i < m_player_aircrafts.size(); ++i)
