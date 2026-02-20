@@ -97,6 +97,7 @@ Aircraft::Aircraft(AircraftType type, const TextureHolder& textures, const FontH
 		m_dust_emitter = dust_emitter.get();
 
 		m_dust_emitter->setPosition({ 0.f, 32.f });
+		m_dust_emitter->SetEmissionRate(8.f);
 
 		AttachChild(std::move(dust_emitter));
 
@@ -602,7 +603,7 @@ void Aircraft::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 
 		if (m_dust_emitter)
 		{
-			bool should_emit = is_moving && IsOnGround();
+			bool should_emit = is_moving && IsOnGround() && !IsKnockbackActive();
 			m_dust_emitter->SetEmitting(should_emit);
 		}
 

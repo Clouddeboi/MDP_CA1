@@ -6,6 +6,7 @@ EmitterNode::EmitterNode(ParticleType type)
 	, m_type(type)
 	, m_particle_system(nullptr)
 	, m_is_emitting(true)
+	, m_emission_rate(30.f)
 {
 }
 
@@ -36,8 +37,7 @@ void EmitterNode::EmitParticles(sf::Time dt)
 	if (!m_is_emitting)
 		return;
 
-	const float emissionRate = 30.f;
-	const sf::Time interval = sf::seconds(1.f) / emissionRate;
+	const sf::Time interval = sf::seconds(1.f) / m_emission_rate;
 
 	m_accumulated_time += dt;
 	while (m_accumulated_time > interval)
@@ -55,4 +55,9 @@ void EmitterNode::SetEmitting(bool emitting)
 bool EmitterNode::IsEmitting() const
 {
 	return m_is_emitting;
+}
+
+void EmitterNode::SetEmissionRate(float rate)
+{
+	m_emission_rate = rate;
 }

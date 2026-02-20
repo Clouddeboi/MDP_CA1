@@ -10,6 +10,7 @@ public:
 
 	void SetEmitting(bool emitting);
 	bool IsEmitting() const;
+	void SetEmissionRate(float rate);
 
 private:
 	virtual void UpdateCurrent(sf::Time dt, CommandQueue& commands);
@@ -21,5 +22,6 @@ private:
 	ParticleNode* m_particle_system;
 
 	bool m_is_emitting;
+	float m_emission_rate;
 };
 
