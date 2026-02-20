@@ -23,7 +23,7 @@ World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sou
 	,m_scene_texture({ m_target.getSize().x, m_target.getSize().y })
 	,m_player_scores(2, 0)//2 players, 0 points
 	,m_current_round(1)
-	,m_points_to_win(2)
+	,m_points_to_win(5)
 	,m_round_over(false)
 	,m_round_restart_timer(sf::Time::Zero)
 	,m_round_restart_delay(sf::seconds(3.0f))
