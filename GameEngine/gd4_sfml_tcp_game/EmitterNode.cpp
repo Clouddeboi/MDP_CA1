@@ -5,6 +5,7 @@ EmitterNode::EmitterNode(ParticleType type)
 	, m_accumulated_time(sf::Time::Zero)
 	, m_type(type)
 	, m_particle_system(nullptr)
+	, m_is_emitting(true)
 {
 }
 
@@ -32,6 +33,9 @@ void EmitterNode::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 
 void EmitterNode::EmitParticles(sf::Time dt)
 {
+	if (!m_is_emitting)
+		return;
+
 	const float emissionRate = 30.f;
 	const sf::Time interval = sf::seconds(1.f) / emissionRate;
 
@@ -41,4 +45,14 @@ void EmitterNode::EmitParticles(sf::Time dt)
 		m_accumulated_time -= interval;
 		m_particle_system->AddParticle(GetWorldPosition());
 	}
+}
+
+void EmitterNode::SetEmitting(bool emitting)
+{
+	m_is_emitting = emitting;
+}
+
+bool EmitterNode::IsEmitting() const
+{
+	return m_is_emitting;
 }

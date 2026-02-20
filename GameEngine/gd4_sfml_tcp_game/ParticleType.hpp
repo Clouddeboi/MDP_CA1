@@ -3,5 +3,6 @@ enum class ParticleType
 {
 	kPropellant,
 	kSmoke,
+	kDust,
 	kParticleCount,
 };

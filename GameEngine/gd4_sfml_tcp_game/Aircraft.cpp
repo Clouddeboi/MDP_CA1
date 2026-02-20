@@ -81,6 +81,8 @@ Aircraft::Aircraft(AircraftType type, const TextureHolder& textures, const FontH
 	, m_current_animation(nullptr)
 	, m_use_animations(false)
 	, m_facing_right(true)
+	, m_dust_emitter(nullptr)
+	, m_is_emitting_dust(false)
 
 {
 	m_explosion.SetFrameSize(sf::Vector2i(256, 256));
@@ -91,6 +93,13 @@ Aircraft::Aircraft(AircraftType type, const TextureHolder& textures, const FontH
 
 	if (m_player_id >= 0)
 	{
+		std::unique_ptr<EmitterNode> dust_emitter(new EmitterNode(ParticleType::kDust));
+		m_dust_emitter = dust_emitter.get();
+
+		m_dust_emitter->setPosition({ 0.f, 32.f });
+
+		AttachChild(std::move(dust_emitter));
+
 		m_use_animations = true;
 
 		TextureID anim_texture = (m_player_id == 0) ? TextureID::kPlayer1Animations : TextureID::kPlayer2Animations;
@@ -589,6 +598,12 @@ void Aircraft::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 		else
 		{
 			m_current_animation->setScale({ -1.f, 1.f });
+		}
+
+		if (m_dust_emitter)
+		{
+			bool should_emit = is_moving && IsOnGround();
+			m_dust_emitter->SetEmitting(should_emit);
 		}
 
 		if (is_moving && m_current_animation != &m_run_animation)

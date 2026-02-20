@@ -9,6 +9,7 @@
 #include <SFML/Graphics/Sprite.hpp>
 #include "Animation.hpp"
 #include "SpriteNode.hpp"
+#include "EmitterNode.hpp"
 #include <vector> 
 
 class Aircraft : public Entity
@@ -92,6 +93,9 @@ private:
 	TextNode* m_missile_display;
 	float m_distance_travelled;
 	int m_directions_index;
+
+	EmitterNode* m_dust_emitter;
+	bool m_is_emitting_dust;
 
 	Command m_fire_command;
 	Command m_missile_command;
