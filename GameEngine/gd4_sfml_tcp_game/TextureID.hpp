@@ -24,5 +24,7 @@ enum class TextureID
 	kParticle,
 	kPlatform,
 	kBox,
-	kPowerUps
+	kPowerUps,
+	kPlayer1Animations,
+	kPlayer2Animations
 };
