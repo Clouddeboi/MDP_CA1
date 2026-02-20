@@ -86,6 +86,7 @@ private:
 	Animation m_run_animation;
 	Animation* m_current_animation;
 	bool m_use_animations;
+	bool m_facing_right;
 
 	TextNode* m_health_display;
 	TextNode* m_missile_display;

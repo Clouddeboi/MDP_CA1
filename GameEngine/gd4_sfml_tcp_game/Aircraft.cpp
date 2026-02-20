@@ -80,6 +80,7 @@ Aircraft::Aircraft(AircraftType type, const TextureHolder& textures, const FontH
 	, m_run_animation(textures.Get(TextureID::kPlayer1Animations))
 	, m_current_animation(nullptr)
 	, m_use_animations(false)
+	, m_facing_right(true)
 
 {
 	m_explosion.SetFrameSize(sf::Vector2i(256, 256));
@@ -571,6 +572,24 @@ void Aircraft::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 	{
 		sf::Vector2f velocity = GetVelocity();
 		bool is_moving = std::abs(velocity.x) > 10.f;
+
+		if (velocity.x > 10.f)
+		{
+			m_facing_right = true;
+		}
+		else if (velocity.x < -10.f)
+		{
+			m_facing_right = false;
+		}
+
+		if (m_facing_right)
+		{
+			m_current_animation->setScale({ 1.f, 1.f });
+		}
+		else
+		{
+			m_current_animation->setScale({ -1.f, 1.f });
+		}
 
 		if (is_moving && m_current_animation != &m_run_animation)
 		{
