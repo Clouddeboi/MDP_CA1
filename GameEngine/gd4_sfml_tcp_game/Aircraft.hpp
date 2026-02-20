@@ -82,6 +82,11 @@ private:
 	sf::Sprite m_sprite;
 	Animation m_explosion;
 
+	Animation m_idle_animation;
+	Animation m_run_animation;
+	Animation* m_current_animation;
+	bool m_use_animations;
+
 	TextNode* m_health_display;
 	TextNode* m_missile_display;
 	float m_distance_travelled;

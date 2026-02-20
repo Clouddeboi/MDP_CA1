@@ -697,6 +697,10 @@ void World::LoadTextures()
 	//Tiles are all 64x64, if used on a platform they need to be (x= 64.f y= 64.f)
 	m_textures.Load(TextureID::kPlatform, "Media/Textures/stone_tile.png");
 	m_textures.Load(TextureID::kBox, "Media/Textures/crate_tile.png");
+
+	m_textures.Load(TextureID::kPlayer1Animations, "Media/Textures/Player_Yellow_AnimSheet.png");
+	m_textures.Load(TextureID::kPlayer2Animations, "Media/Textures/Player_Red_AnimSheet.png");
+
 }
 
 void World::AddPlatform(float x, float y, float width, float height, float unit)

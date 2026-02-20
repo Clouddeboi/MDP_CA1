@@ -76,6 +76,10 @@ Aircraft::Aircraft(AircraftType type, const TextureHolder& textures, const FontH
 	, m_just_landed(false)
 	, m_just_got_hit(false)
 	, m_just_died(false)
+	, m_idle_animation(textures.Get(TextureID::kPlayer1Animations))
+	, m_run_animation(textures.Get(TextureID::kPlayer1Animations))
+	, m_current_animation(nullptr)
+	, m_use_animations(false)
 
 {
 	m_explosion.SetFrameSize(sf::Vector2i(256, 256));
@@ -83,6 +87,29 @@ Aircraft::Aircraft(AircraftType type, const TextureHolder& textures, const FontH
 	m_explosion.SetDuration(sf::seconds(1));
 	Utility::CentreOrigin(m_sprite);
 	Utility::CentreOrigin(m_explosion);
+
+	if (m_player_id >= 0)
+	{
+		m_use_animations = true;
+
+		TextureID anim_texture = (m_player_id == 0) ? TextureID::kPlayer1Animations : TextureID::kPlayer2Animations;
+
+		m_idle_animation.SetTexture(textures.Get(anim_texture));
+		m_idle_animation.SetFrameSize(sf::Vector2i(64, 64));
+		m_idle_animation.SetNumFrames(4);
+		m_idle_animation.SetDuration(sf::seconds(0.5f));
+		m_idle_animation.SetRepeating(true);
+		Utility::CentreOrigin(m_idle_animation);
+
+		m_run_animation.SetTexture(textures.Get(anim_texture));
+		m_run_animation.SetFrameSize(sf::Vector2i(64, 64));
+		m_run_animation.SetNumFrames(4);
+		m_run_animation.SetDuration(sf::seconds(0.8f));
+		m_run_animation.SetRepeating(true);
+		Utility::CentreOrigin(m_run_animation);
+
+		m_current_animation = &m_idle_animation;
+	}
 
 	if (Table[static_cast<int>(type)].m_has_gun)
 	{
@@ -432,13 +459,16 @@ void Aircraft::DrawCurrent(sf::RenderTarget& target, sf::RenderStates states) co
 	{
 		return;
 	}
-	//if (IsDestroyed() && m_show_explosion)
-	//{
-	//	target.draw(m_explosion, states);
-	//}
 	else
 	{
-		target.draw(m_sprite, states);
+		if (m_use_animations && m_current_animation)
+		{
+			target.draw(*m_current_animation, states);
+		}
+		else
+		{
+			target.draw(m_sprite, states);
+		}
 
 		if (m_has_gun && m_gun_sprite)
 		{
@@ -535,6 +565,25 @@ void Aircraft::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 		}
 
 		return;
+	}
+
+	if (m_use_animations && m_current_animation)
+	{
+		sf::Vector2f velocity = GetVelocity();
+		bool is_moving = std::abs(velocity.x) > 10.f;
+
+		if (is_moving && m_current_animation != &m_run_animation)
+		{
+			m_current_animation = &m_run_animation;
+			m_current_animation->Restart();
+		}
+		else if (!is_moving && m_current_animation != &m_idle_animation)
+		{
+			m_current_animation = &m_idle_animation;
+			m_current_animation->Restart();
+		}
+
+		m_current_animation->Update(dt);
 	}
 
 	UpdatePowerUps(dt, commands);
