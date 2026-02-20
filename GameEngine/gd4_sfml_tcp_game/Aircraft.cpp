@@ -97,7 +97,7 @@ Aircraft::Aircraft(AircraftType type, const TextureHolder& textures, const FontH
 		m_dust_emitter = dust_emitter.get();
 
 		m_dust_emitter->setPosition({ 0.f, 32.f });
-		m_dust_emitter->SetEmissionRate(8.f);
+		m_dust_emitter->SetEmissionRate(15.f);
 
 		AttachChild(std::move(dust_emitter));
 

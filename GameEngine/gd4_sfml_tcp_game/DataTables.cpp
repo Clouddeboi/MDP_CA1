@@ -156,8 +156,8 @@ std::vector<ParticleData> InitializeParticleData()
     data[static_cast<int>(ParticleType::kSmoke)].m_color = sf::Color(50, 50, 50);
     data[static_cast<int>(ParticleType::kSmoke)].m_lifetime = sf::seconds(2.5f);
 
-    data[static_cast<int>(ParticleType::kDust)].m_color = sf::Color(200, 180, 140, 180);
-    data[static_cast<int>(ParticleType::kDust)].m_lifetime = sf::seconds(0.4f);
+    data[static_cast<int>(ParticleType::kDust)].m_color = sf::Color(200, 200, 200, 180);
+    data[static_cast<int>(ParticleType::kDust)].m_lifetime = sf::seconds(0.5f);
 
     return data;
 }
