@@ -93,9 +93,11 @@ Aircraft::Aircraft(AircraftType type, const TextureHolder& textures, const FontH
 
 	if (m_player_id >= 0)
 	{
+		//Create dust emitter for player and store pointer so we can toggle emission on/off
 		std::unique_ptr<EmitterNode> dust_emitter(new EmitterNode(ParticleType::kDust));
 		m_dust_emitter = dust_emitter.get();
 
+		//Position emitter at the players feet
 		m_dust_emitter->setPosition({ 0.f, 32.f });
 		m_dust_emitter->SetEmissionRate(15.f);
 
@@ -232,16 +234,17 @@ void Aircraft::IncreaseSpeed()
 
 void Aircraft::ApplyPowerUp(PickupType type, sf::Time duration)
 {
+	//If power-up of this type is already active, just refresh duration (don't stack)
 	for (auto& effect : m_active_powerups)
 	{
 		if (effect.type == type)
 		{
-			//Refresh duration (don't stack)
 			effect.remaining_duration = duration;
 			return;
 		}
 	}
 
+	//Apply the power-up effect
 	PowerUpEffect new_effect;
 	new_effect.type = type;
 	new_effect.remaining_duration = duration;
@@ -271,6 +274,7 @@ void Aircraft::ApplyPowerUp(PickupType type, sf::Time duration)
 
 bool Aircraft::HasActivePowerUp(PickupType type) const
 {
+	//Check if powerup is active
 	for (const auto& effect : m_active_powerups)
 	{
 		if (effect.type == type)
@@ -583,6 +587,7 @@ void Aircraft::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 		sf::Vector2f velocity = GetVelocity();
 		bool is_moving = std::abs(velocity.x) > 10.f;
 
+		//Determine facing direction based on horizontal velocity
 		if (velocity.x > 10.f)
 		{
 			m_facing_right = true;
@@ -592,6 +597,7 @@ void Aircraft::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 			m_facing_right = false;
 		}
 
+		//Flip horizontal scale of animation to match facing direction
 		if (m_facing_right)
 		{
 			m_current_animation->setScale({ 1.f, 1.f });
@@ -603,10 +609,12 @@ void Aircraft::UpdateCurrent(sf::Time dt, CommandQueue& commands)
 
 		if (m_dust_emitter)
 		{
+			//Only emit dust when moving, on the ground and not in knockback
 			bool should_emit = is_moving && IsOnGround() && !IsKnockbackActive();
 			m_dust_emitter->SetEmitting(should_emit);
 		}
 
+		//Switch animation based on movement state (idle or running)
 		if (is_moving && m_current_animation != &m_run_animation)
 		{
 			m_current_animation = &m_run_animation;

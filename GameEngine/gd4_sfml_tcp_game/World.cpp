@@ -70,6 +70,7 @@ void World::Update(sf::Time dt)
 {
 	if (m_game_over)
 	{
+		//Freeze camera during game over
 		if (!m_camera_state_saved)
 		{
 			m_saved_camera_state = m_camera;
@@ -278,6 +279,7 @@ void World::CheckRoundEnd()
 	int alive_count = CountAlivePlayers();
 	int last_alive_player = -1;
 
+	//Find which player is still alive
 	for (size_t i = 0; i < m_player_aircrafts.size(); ++i)
 	{
 		if (m_player_aircrafts[i] && !m_player_aircrafts[i]->IsDestroyed())
@@ -286,12 +288,14 @@ void World::CheckRoundEnd()
 		}
 	}
 
+	//If 1 player alive
 	if (alive_count <= 1)
 	{
 		m_round_over = true;
 		m_round_restart_timer = sf::Time::Zero;
 
 
+		//Per player status
 		std::cout << "\n=== ROUND " << m_current_round << " OVER ===" << std::endl;
 		for (size_t i = 0; i < m_player_aircrafts.size(); ++i)
 		{
@@ -348,11 +352,13 @@ void World::StartNewRound()
 		}
 		std::cout << "=================\n" << std::endl;
 
+		//Set game over to true and don't start a new round
 		m_game_over = true;
 		m_game_over_timer = sf::Time::Zero;
 		return;
 	}
 
+	//Increment round number and reset round state
 	m_current_round++;
 	m_round_over = false;
 	m_camera_state_saved = false;
@@ -383,6 +389,7 @@ void World::StartNewRound()
 
 void World::RespawnPlayers()
 {
+	//Respawn each player, reset health, position, velocity, and clear forces/knockback
 	for (size_t i = 0; i < m_player_aircrafts.size(); ++i)
 	{
 		Aircraft* player = m_player_aircrafts[i];
@@ -407,6 +414,7 @@ void World::RespawnPlayers()
 	}
 }
 
+//Helper function to count how many players are still alive
 int World::CountAlivePlayers() const
 {
 	int count = 0;
@@ -420,6 +428,7 @@ int World::CountAlivePlayers() const
 	return count;
 }
 
+//Helper function to get the score of a player by index
 int World::GetPlayerScore(int player_index) const
 {
 	if (player_index >= 0 && player_index < static_cast<int>(m_player_scores.size()))
@@ -506,7 +515,7 @@ void World::UpdateRoundOverlay()
 
 	sf::FloatRect text_bounds = m_round_over_text->getLocalBounds();
 	m_round_over_text->setOrigin({ text_bounds.position.x + text_bounds.size.x / 2.f, text_bounds.position.y + text_bounds.size.y / 2.f });
-	m_round_over_text->setPosition({ view_center.x, view_center.y - 100.f });  // Fixed screen position
+	m_round_over_text->setPosition({ view_center.x, view_center.y - 100.f });//Fixed screen position
 
 	float remaining_time = (m_round_restart_delay - m_round_restart_timer).asSeconds();
 	int seconds = static_cast<int>(std::ceil(remaining_time));
@@ -522,7 +531,7 @@ void World::UpdateRoundOverlay()
 
 	sf::FloatRect countdown_bounds = m_round_countdown_text->getLocalBounds();
 	m_round_countdown_text->setOrigin({ countdown_bounds.position.x + countdown_bounds.size.x / 2.f, countdown_bounds.position.y + countdown_bounds.size.y / 2.f });
-	m_round_countdown_text->setPosition({ view_center.x, view_center.y + 50.f });  // Fixed screen position
+	m_round_countdown_text->setPosition({ view_center.x, view_center.y + 50.f });//Fixed screen position
 }
 
 void World::Draw()
@@ -631,7 +640,7 @@ void World::UpdateScreenShake(sf::Time dt)
 		m_screen_shake_timer += dt;
 		m_screen_shake_time_accumulator += dt;
 
-		// Fade out intensity over duration
+		//Fade out intensity over duration
 		float progress = m_screen_shake_timer.asSeconds() / m_screen_shake_duration.asSeconds();
 		float current_intensity = m_screen_shake_intensity * (1.f - progress);
 
@@ -863,12 +872,14 @@ void World::UpdateScoreDisplay()
 	const float padding = 20.f;
 	const float score_spacing = 60.f;
 
+	//Update each players score
 	for (size_t i = 0; i < m_score_displays.size() && i < m_player_scores.size(); ++i)
 	{
 		if (m_score_displays[i])
 		{
 			m_score_displays[i]->SetString(std::to_string(m_player_scores[i]));
 
+			//Text follows camera
 			float y_position = view_bounds.position.y + padding + (i * score_spacing);
 			m_score_displays[i]->setPosition({ view_bounds.position.x + padding, y_position });
 		}
@@ -1006,11 +1017,12 @@ void World::SpawnPickups()
 
 	std::unique_ptr<Pickup> pickup(new Pickup(type, m_textures));
 	pickup->setPosition({ spawn_x, spawn_y });
-	pickup->SetVelocity(0.f, 0.f); // Gravity will handle falling
+	//Gravity will handle falling
+	pickup->SetVelocity(0.f, 0.f);
 
 	m_scene_layers[static_cast<int>(SceneLayers::kUpperAir)]->AttachChild(std::move(pickup));
 
-	std::cout << "Pickup spawned successfully!" << std::endl;
+	//std::cout << "Pickup spawned successfully!" << std::endl;
 }
 
 sf::FloatRect World::GetViewBounds() const
@@ -1033,7 +1045,7 @@ void World::DestroyEntitiesOutsideView()
 	Command command;
 	command.category = static_cast<int>(ReceiverCategories::kEnemyAircraft) 
 		| static_cast<int>(ReceiverCategories::kProjectile) 
-		| static_cast<int>(ReceiverCategories::kPickup); ;
+		| static_cast<int>(ReceiverCategories::kPickup);
 	command.action = DerivedAction<Entity>([this](Entity& e, sf::Time dt)
 		{
 			//Does the object intersect with the battlefield

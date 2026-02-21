@@ -37,6 +37,7 @@ void EmitterNode::EmitParticles(sf::Time dt)
 	if (!m_is_emitting)
 		return;
 
+	//Calculate the time between particle emissions based on the emission rate
 	const sf::Time interval = sf::seconds(1.f) / m_emission_rate;
 
 	m_accumulated_time += dt;

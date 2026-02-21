@@ -29,6 +29,7 @@ SoundPlayer::SoundPlayer()
 	m_sound_buffers.Load(SoundEffect::kStartGame, "Media/Sound/StartGame.wav");
 	m_sound_buffers.Load(SoundEffect::kPairedPlayer, "Media/Sound/PairedPlayer.wav");
 
+	//Power-up sounds were meant to have diffrent SFX, easily expandable 
 	m_sound_buffers.Load(SoundEffect::kCollectHealth, "Media/Sound/CollectPickup.wav");
 	m_sound_buffers.Load(SoundEffect::kCollectFireSpread, "Media/Sound/CollectPickup.wav");
 	m_sound_buffers.Load(SoundEffect::kCollectFireRate, "Media/Sound/CollectPickup.wav");

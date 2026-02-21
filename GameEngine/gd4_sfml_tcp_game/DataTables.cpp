@@ -87,6 +87,7 @@ std::vector<ProjectileData> InitializeProjectileData()
 
 std::vector<PickupData> InitializePickupData()
 {
+	//Initialize the pickup data table with the appropriate texture, sound, and action for each pickup type
     std::vector<PickupData> data(static_cast<int>(PickupType::kPickupCount));
 
     data[static_cast<int>(PickupType::kHealthRefill)].m_texture = TextureID::kPowerUps;
@@ -156,6 +157,7 @@ std::vector<ParticleData> InitializeParticleData()
     data[static_cast<int>(ParticleType::kSmoke)].m_color = sf::Color(50, 50, 50);
     data[static_cast<int>(ParticleType::kSmoke)].m_lifetime = sf::seconds(2.5f);
 
+	//Grey particle semi-transparent, short lived
     data[static_cast<int>(ParticleType::kDust)].m_color = sf::Color(200, 200, 200, 180);
     data[static_cast<int>(ParticleType::kDust)].m_lifetime = sf::seconds(0.5f);
 

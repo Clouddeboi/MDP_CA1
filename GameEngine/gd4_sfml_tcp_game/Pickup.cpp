@@ -6,8 +6,10 @@
 
 namespace
 {
+	//Load the pickup data from the data table (once)
     const std::vector<PickupData> Table = InitializePickupData();
 
+	//Helper function to get pickup name for debugging
     const char* GetPickupName(PickupType type)
     {
         switch (type)
@@ -28,11 +30,15 @@ Pickup::Pickup(PickupType type, const TextureHolder& textures)
     , m_type(type)
     , m_sprite(textures.Get(Table[static_cast<int>(type)].m_texture), Table[static_cast<int>(type)].m_texture_rect)
 {
-    std::cout << "Pickup constructor: " << GetPickupName(type)
-        << " (ID: " << static_cast<int>(type) << ")" << std::endl;
-    std::cout << "  Texture ID: " << static_cast<int>(Table[static_cast<int>(type)].m_texture) << std::endl;
+	//Debug output to verify correct initialization
+//    std::cout << "Pickup constructor: " << GetPickupName(type)
+//        << " (ID: " << static_cast<int>(type) << ")" << std::endl;
+//    std::cout << "  Texture ID: " << static_cast<int>(Table[static_cast<int>(type)].m_texture) << std::endl;
+//    
     
     Utility::CentreOrigin(m_sprite);
+
+    //Apply physics
     SetUsePhysics(true);
     SetMass(1.f);
     SetLinearDrag(10.5f);

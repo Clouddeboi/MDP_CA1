@@ -12,6 +12,8 @@ enum class SoundEffect
 	kStartGame,
 	kPairedPlayer,
 	kButtonClick,
+
+	//Power-ups
 	kCollectHealth,
 	kCollectFireSpread,
 	kCollectFireRate,
@@ -19,6 +21,8 @@ enum class SoundEffect
 	kCollectJump,
 	kCollectSpeed,
 	kPowerUpExpired,
+
+	//Player Actions
 	kPlayerJump1,
 	kPlayerJump2,
 	kPlayerJump3,

@@ -16,6 +16,7 @@ BindingState::BindingState(StateStack& stack, Context context)
 	sf::RenderWindow& window = *GetContext().window;
 	sf::Vector2f windowSize(window.getSize());
 
+	//Title Text
 	m_title_text.emplace(context.fonts->Get(Font::kMain), "PLAYER BINDING", 60);
 	m_title_text->setFillColor(sf::Color::White);
 	m_title_text->setOutlineColor(sf::Color::Black);
@@ -23,6 +24,7 @@ BindingState::BindingState(StateStack& stack, Context context)
 	Utility::CentreOrigin(*m_title_text);
 	m_title_text->setPosition({ windowSize.x / 2.f, 100.f });
 
+	//Inatructions Text
 	m_instructions_text.emplace(context.fonts->Get(Font::kMain), "Press any button on your input device to bind", 24);
 	m_instructions_text->setFillColor(sf::Color::White);
 	m_instructions_text->setOutlineColor(sf::Color::Black);
@@ -30,6 +32,7 @@ BindingState::BindingState(StateStack& stack, Context context)
 	Utility::CentreOrigin(*m_instructions_text);
 	m_instructions_text->setPosition({ windowSize.x / 2.f, 180.f });
 
+	//Player Status Text
 	for (int i = 0; i < kMaxPlayers; ++i)
 	{
 		m_player_status_text[i].emplace(context.fonts->Get(Font::kMain), "", 32);
@@ -37,6 +40,7 @@ BindingState::BindingState(StateStack& stack, Context context)
 		m_player_status_text[i]->setPosition({ 100.f, 280.f + (i * 100.f) });
 	}
 
+	//Ready Text
 	m_ready_text.emplace(context.fonts->Get(Font::kMain), "Press ENTER to start game\nPress ESC to unbind all", 28);
 	m_ready_text->setFillColor(sf::Color::Green);
 	m_ready_text->setOutlineColor(sf::Color::Black);
@@ -68,6 +72,7 @@ void BindingState::Draw()
 			window.draw(*m_player_status_text[i]);
 	}
 
+	//Only shows ready text when all players are bound
 	if (m_all_players_bound && m_ready_text)
 	{
 		window.draw(*m_ready_text);
@@ -105,6 +110,7 @@ bool BindingState::HandleEvent(const sf::Event& event)
 					}
 				}
 
+				//Transition to game state and remove binding state from stack
 				RequestStackPop();
 				RequestStackPush(StateID::kGame);
 				return false;
@@ -112,6 +118,7 @@ bool BindingState::HandleEvent(const sf::Event& event)
 		}
 	}
 
+	//If ESC is pressed, either unbind all players or go back to menu if no players are currently bound
 	if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>())
 	{
 		if (keyPressed->code == sf::Keyboard::Key::Escape)
@@ -136,6 +143,7 @@ bool BindingState::HandleEvent(const sf::Event& event)
 		}
 	}
 
+	//Detect input events for binding
 	if (m_device_detector.IsInputEvent(event))
 	{
 		auto device = m_device_detector.DetectDeviceFromEvent(event);
@@ -152,7 +160,7 @@ bool BindingState::HandleEvent(const sf::Event& event)
 						UpdatePlayerStatusText();
 						CheckBindingComplete();
 					}
-					break;
+					break;//Only bind one player per input event, so break after first attempt
 				}
 			}
 		}
@@ -197,6 +205,7 @@ void BindingState::UpdatePlayerStatusText()
 
 		if (m_binding_manager.IsPlayerBound(i))
 		{
+			//If player is bound, show device name and change text color to green
 			auto device = m_binding_manager.GetPlayerDevice(i);
 			if (device.has_value())
 			{
@@ -209,6 +218,7 @@ void BindingState::UpdatePlayerStatusText()
 		}
 		else
 		{
+			//Player is not bound, show waiting message and keep text color white
 			statusText += "Waiting for input...";
 			m_player_status_text[i]->setFillColor(sf::Color::White);
 			m_player_status_text[i]->setOutlineColor(sf::Color::Black);
@@ -223,6 +233,7 @@ void BindingState::UpdatePlayerStatusText()
 	UpdateInstructions();
 }
 
+//Checks if all players are bound and updates state
 void BindingState::CheckBindingComplete()
 {
 	if (m_binding_manager.IsBindingComplete())
