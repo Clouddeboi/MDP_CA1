@@ -806,14 +806,19 @@ void World::BuildScene()
 	//x,y,w,h,unit
 	AddPlatform(3.f, 7.f, 5.f, 2.f, tile_unit);
 	AddPlatform(18.f, 7.f, 5.f, 2.f, tile_unit);
-	AddPlatform(10.5f, 13.f, 6.f, 1.f, tile_unit);
+	AddPlatform(10.5f, 14.f, 6.f, 1.f, tile_unit);
 	AddPlatform(6.5f, 11.5f, 1.f, 1.f, tile_unit);
 	AddPlatform(14.5f, 11.5f, 1.f, 1.f, tile_unit);
 	AddPlatform(10.5f, 9.f, 4.f, 1.f, tile_unit);
+	AddPlatform(4.f, 16.f, 5.f, 1.f, tile_unit);
+	AddPlatform(18.f, 16.f, 5.f, 1.f, tile_unit);
 
-	AddBox(400.f, 600.f);
-	AddBox(700.f, 600.f);
-	
+	AddBox(350.f, 600.f);
+	AddBox(410.f, 600.f);
+	AddBox(710.f, 600.f);
+	AddBox(890.f, 600.f);
+	AddBox(1100.f, 600.f);
+
 	//Add the particle nodes to the scene
 	std::unique_ptr<ParticleNode> smokeNode(new ParticleNode(ParticleType::kSmoke, m_textures));
 	m_scene_layers[static_cast<int>(SceneLayers::kLowerAir)]->AttachChild(std::move(smokeNode));
@@ -1583,3 +1588,4 @@ void World::UpdateSounds()
 	// Remove unused sounds
 	m_sounds.RemoveStoppedSounds();
 }
+	
