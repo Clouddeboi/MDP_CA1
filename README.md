@@ -8,17 +8,35 @@ A 2D physics-based shooter game inspired mainly by Rounds. The core gameplay loo
 - Dust particles randomly "connect" between players
 - Collisions sometimes fail whenever game is loaded, they work when game is relaunched (this happens rarely)
 - Re-mapping controls works only for keyboard (no compatability with mouse or gamepad)
-  
+
+## AI Usage
+- I used Github Copilot with the integrated Claude Sonnet 4.5 Model
+- #### THE AI WAS NEVER USED TO WRITE ENTIRE FILES OR FEATURES IT WAS USED AS A TOOL!!!
+- The Agent was used to:
+  - Assist with bug fixes (exp. Gun rotation formula was not correctly written and didn't allow for the gun to be rotate both ways)
+  - Explain code that I didn't understand (From the original repository, this helped me to expand on the code from class then myself.)
+  - Assist with writing more complex code (exp. Player input binding, I couldn't find any proper resources for more complex features like this that were not outdated)
+
 ## References
-- Inspiration: https://store.steampowered.com/app/1557740/ROUNDS/
-- Github Copilot (Student): https://github.com/education/students
-- Network Discussion: https://studentdkit-my.sharepoint.com/:w:/g/personal/d00256088_student_dkit_ie/IQBgn6McPDNJSrFpiSBBLzAdAXBIbShsGV7xgL1y0h50X8Q?e=AUL8cQ
-- Graphics:
+- ### Inspiration:
+  - https://store.steampowered.com/app/1557740/ROUNDS/
+- ### Github Copilot (Student):
+  - https://github.com/education/students
+- ### Network Discussion:
+  - https://studentdkit-my.sharepoint.com/:w:/g/personal/d00256088_student_dkit_ie/IQBgn6McPDNJSrFpiSBBLzAdAXBIbShsGV7xgL1y0h50X8Q?e=AUL8cQ
+- ### Coding resources:
+  - Physics:
+    - Semi-Implicit Euler Integration: https://gafferongames.com/post/integration_basics/
+  - Controller/Inputs:
+    - SFML Joystick Example (github): https://github.com/SFML/SFML/blob/3.0.0/examples/joystick/Joystick.cpp
+  - Collisions:
+    - Platform Collisions: https://code.tutsplus.com/collision-detection-using-the-separating-axis-theorem--gamedev-169t  
+- ### Graphics:
   - Spritesheet - https://kenney.nl/assets/scribble-platformer
   - Chromatic Abberation Shader: https://www.shadertoy.com/view/Mds3zn
   - Screen Shake Shader: https://www.shadertoy.com/view/tdSyWz
   - Shader Website: https://www.shadertoy.com/
-- Audio:
+- ### Audio:
   - StartGame - https://freesound.org/people/Breviceps/sounds/452998/
   - Error - https://freesound.org/people/Sadiquecat/sounds/794316/
   - PairedPlayer - https://freesound.org/people/shaman32/sounds/840274/
