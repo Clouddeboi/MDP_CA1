@@ -8,10 +8,11 @@ A 2D physics-based shooter game inspired mainly by Rounds. The core gameplay loo
 - Dust particles randomly "connect" between players
 - Collisions sometimes fail whenever game is loaded, they work when game is relaunched (this happens rarely)
 - Re-mapping controls works only for keyboard (no compatability with mouse or gamepad)
-
-## Network Discussiom
-
+  
 ## References
 - Inspiration: https://store.steampowered.com/app/1557740/ROUNDS/
 - Github Copilot (Student): https://github.com/education/students
 - Shader Website: https://www.shadertoy.com/
+- Network Discussion: https://studentdkit-my.sharepoint.com/:w:/g/personal/d00256088_student_dkit_ie/IQBgn6McPDNJSrFpiSBBLzAdAXBIbShsGV7xgL1y0h50X8Q?e=AUL8cQ
+- Chromatic Abberation Shader: https://www.shadertoy.com/view/Mds3zn
+- Screen Shake Shader: https://www.shadertoy.com/view/tdSyWz
