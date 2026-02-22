@@ -9,6 +9,18 @@
 #include <iostream>
 #include <ctime>  
 
+/*
+ * Code implementation assisted by Claude Sonnet 4.5
+ * Used for: 
+- Camera Zoom
+- Shader implementation into gameplay features
+- Rounds system bug fixing
+- Complex collisions(player to platfoms)
+- Player ground detection
+- Level creation (Helped write methods for easy platform/box creation)
+ * Original implementation, modified/adapted by Michal Becmer (D00256088) for project requirements
+ */
+
 World::World(sf::RenderTarget& output_target, FontHolder& font, SoundPlayer& sounds)
 	:m_target(output_target)
 	,m_camera(output_target.getDefaultView())

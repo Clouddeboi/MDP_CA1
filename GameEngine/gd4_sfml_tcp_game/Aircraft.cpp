@@ -9,6 +9,12 @@
 #include "SoundNode.hpp"
 #include <iostream>
 
+/*
+ * Code implementation assisted by Claude Sonnet 4.5
+ * Used for: "Player Directions, RotateVectorDeg function logic, Power-up implementation and bug fixing"
+ * Original implementation, modified/adapted by Michal Becmer (D00256088) for project requirements
+ */
+
 namespace
 {
 	const std::vector<AircraftData> Table = InitializeAircraftData();
