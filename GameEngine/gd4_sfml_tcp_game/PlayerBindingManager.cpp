@@ -1,6 +1,12 @@
 #include "PlayerBindingManager.hpp"
 #include <iostream>
 
+/*
+ * Code implementation assisted by Claude Sonnet 4.5
+ * Used for: "Player Input Binding and Debugging"
+ * Original implementation, modified/adapted by Michal Becmer (D00256088) for project requirements
+ */
+
 PlayerBindingManager::PlayerBindingManager()
 {
 	for (int i = 0; i < kMaxPlayers; ++i)

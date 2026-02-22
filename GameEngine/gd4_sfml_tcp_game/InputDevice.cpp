@@ -2,6 +2,12 @@
 #include <iostream>
 #include <sstream>
 
+/*
+ * Code implementation assisted by Claude Sonnet 4.5
+ * Used for: "Detecting input devices and debugging"
+ * Original implementation, modified/adapted by Michal Becmer (D00256088) for project requirements
+ */
+
 InputDeviceDetector::InputDeviceDetector()
 {
 	std::cout << "[InputDevice] Input device detector initialized\n";

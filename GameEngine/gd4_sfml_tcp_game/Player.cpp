@@ -232,6 +232,11 @@ std::optional<unsigned> Player::GetAssignedJoystickButton(Action action) const
     return std::nullopt;
 }
 
+/*
+ * Code implementation assisted by Claude Sonnet 4.5
+ * Used for: "Aiming gun with Joystick"
+ * Original implementation, modified/adapted by Michal Becmer (D00256088) for project requirements
+ */
 sf::Vector2f Player::GetJoystickAim() const
 {
     if (m_joystick_id < 0 || !sf::Joystick::isConnected(static_cast<unsigned int>(m_joystick_id)))

@@ -3,6 +3,12 @@
 #include <array>
 #include <optional>
 
+/*
+ * Code implementation assisted by Claude Sonnet 4.5
+ * Used for: "Player Input Binding configs (get device, clear devices etc.)"
+ * Original implementation, modified/adapted by Michal Becmer (D00256088) for project requirements
+ */
+
 //Singleton to store player binding configuration between states
 class PlayerBindingConfig
 {

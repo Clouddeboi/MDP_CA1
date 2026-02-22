@@ -5,6 +5,12 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <iostream>
 
+/*
+ * Code implementation assisted by Claude Sonnet 4.5
+ * Used for: "HandleEvent functionality"
+ * Original implementation, modified/adapted by Michal Becmer (D00256088) for project requirements
+ */
+
 BindingState::BindingState(StateStack& stack, Context context)
 	: State(stack, context)
 	, m_background_sprite(context.textures->Get(TextureID::kTitleScreen))
