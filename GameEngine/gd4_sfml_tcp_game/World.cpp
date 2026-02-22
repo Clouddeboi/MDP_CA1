@@ -1127,6 +1127,7 @@ bool MatchesCategories(SceneNode::Pair& colliders, ReceiverCategories type1, Rec
 	else if (static_cast<int>(type1) & category2 && static_cast<int>(type2) & category1)
 	{ 
 		std::swap(colliders.first, colliders.second);
+		return true;
 	}
 	else
 	{
